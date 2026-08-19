@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -40,6 +41,7 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin" element={<AdminDashboardPage />} />
       <Route path="/" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
     </Routes>
   );
