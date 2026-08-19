@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import './App.css';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();

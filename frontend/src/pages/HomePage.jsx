@@ -2,130 +2,223 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
-  const { user, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">✈️ AeroBook</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition"
-          >
-            Logout
-          </button>
+    <div className="home-page">
+
+      {/* Navigation Bar */}
+      <nav className="navbar">
+        <div className="logo">
+          ✈ AeroBook
+        </div>
+
+        <div className="nav-links">
+          <a href="/">Home</a>
+          <a href="#">Flights</a>
+          <a href="#">My Bookings</a>
+          <a href="#">About</a>
+        </div>
+
+        <div className="nav-buttons">
+          {isAuthenticated ? (
+            <button className="signup-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <>
+              <button className="login-btn" onClick={() => navigate('/login')}>
+                Login
+              </button>
+              <button className="signup-btn" onClick={() => navigate('/register')}>
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-2xl shadow-xl p-12">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Welcome, {user?.name}!</h2>
-            <p className="text-xl text-gray-600">Your account is all set and ready to book your next flight</p>
-          </div>
 
-          {/* User Info Card */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 mb-12 border border-blue-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Your Profile</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Name</label>
-                <p className="text-lg text-gray-900 font-semibold">{user?.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Email</label>
-                <p className="text-lg text-gray-900 font-semibold">{user?.email}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Passport Number</label>
-                <p className="text-lg text-gray-900 font-semibold">
-                  {user?.passport ?? user?.passenger?.passport ?? 'Not provided'}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">Member Since</label>
-                <p className="text-lg text-gray-900 font-semibold">
-                  {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Recently'}
-                </p>
-              </div>
+      {/* Hero Section */}
+      <section className="hero-section">
+
+        <div className="hero-content">
+          <p className="hero-label">YOUR JOURNEY STARTS HERE</p>
+
+          <h1>
+            Fly Beyond
+            <br />
+            <span>Expectations.</span>
+          </h1>
+
+          <p className="hero-description">
+            Book your next flight with AeroBook.
+            Enjoy a fast, secure and seamless flight
+            reservation experience.
+          </p>
+        </div>
+
+
+        {/* Flight Search Card */}
+        <div className="flight-search-card">
+
+          <div className="search-header">
+            <h2>Search Flights</h2>
+
+            <div className="trip-type">
+              <label>
+                <input type="radio" name="trip" defaultChecked />
+                Round Trip
+              </label>
+
+              <label>
+                <input type="radio" name="trip" />
+                One Way
+              </label>
             </div>
           </div>
 
-          {/* Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {/* Search Flights */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-8 text-white shadow-lg hover:shadow-xl transition">
-              <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-2">Search Flights</h3>
-              <p className="mb-6 opacity-90">Find and book the perfect flight for your journey</p>
-              <button className="bg-white text-blue-600 font-semibold px-6 py-2 rounded-lg hover:bg-blue-50 transition">
-                Search Now
-              </button>
+
+          <div className="search-fields">
+
+            <div className="search-field">
+              <label>From</label>
+              <input
+                type="text"
+                placeholder="Departure city"
+              />
             </div>
 
-            {/* My Bookings */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-8 text-white shadow-lg hover:shadow-xl transition">
-              <div className="text-4xl mb-4">📋</div>
-              <h3 className="text-2xl font-bold mb-2">My Bookings</h3>
-              <p className="mb-6 opacity-90">View and manage all your flight bookings</p>
-              <button className="bg-white text-purple-600 font-semibold px-6 py-2 rounded-lg hover:bg-purple-50 transition">
-                View Bookings
-              </button>
+            <div className="swap-icon">
+              ⇄
             </div>
 
-            {/* Rewards */}
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-8 text-white shadow-lg hover:shadow-xl transition">
-              <div className="text-4xl mb-4">⭐</div>
-              <h3 className="text-2xl font-bold mb-2">Rewards</h3>
-              <p className="mb-6 opacity-90">Earn and redeem loyalty points on every booking</p>
-              <button className="bg-white text-amber-600 font-semibold px-6 py-2 rounded-lg hover:bg-amber-50 transition">
-                Check Rewards
-              </button>
+            <div className="search-field">
+              <label>To</label>
+              <input
+                type="text"
+                placeholder="Destination city"
+              />
             </div>
-          </div>
 
-          {/* Quick Stats */}
-          <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Your Activity</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">0</div>
-                <p className="text-gray-600 text-sm">Flights Booked</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">0</div>
-                <p className="text-gray-600 text-sm">Trips Completed</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-amber-600">0</div>
-                <p className="text-gray-600 text-sm">Reward Points</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">0</div>
-                <p className="text-gray-600 text-sm">Miles Traveled</p>
-              </div>
+            <div className="search-field">
+              <label>Departure</label>
+              <input
+                type="date"
+              />
             </div>
+
+            <div className="search-field">
+              <label>Passengers</label>
+              <select defaultValue="1">
+                <option value="1">1 Passenger</option>
+                <option value="2">2 Passengers</option>
+                <option value="3">3 Passengers</option>
+                <option value="4">4 Passengers</option>
+                <option value="5">5 Passengers</option>
+              </select>
+            </div>
+
+            <button className="search-btn">
+              Search Flights
+            </button>
+
           </div>
         </div>
-      </main>
+
+      </section>
+
+
+      {/* Features Section */}
+      <section className="features-section">
+
+        <div className="section-heading">
+          <p>WHY AEROBOOK?</p>
+
+          <h2>
+            Everything you need for
+            <br />
+            a better flight experience.
+          </h2>
+        </div>
+
+
+        <div className="feature-grid">
+
+          <div className="feature-card">
+            <div className="feature-icon">✈</div>
+
+            <h3>Easy Flight Booking</h3>
+
+            <p>
+              Search available flights and reserve
+              your preferred seat with ease.
+            </p>
+          </div>
+
+
+          <div className="feature-card">
+            <div className="feature-icon">◉</div>
+
+            <h3>Real-Time Availability</h3>
+
+            <p>
+              Check current flight and seat
+              availability before making a reservation.
+            </p>
+          </div>
+
+
+          <div className="feature-card">
+            <div className="feature-icon">✓</div>
+
+            <h3>Secure Reservations</h3>
+
+            <p>
+              AeroBook is designed to prevent
+              duplicate seat reservations.
+            </p>
+          </div>
+
+
+          <div className="feature-card">
+            <div className="feature-icon">▣</div>
+
+            <h3>Booking Management</h3>
+
+            <p>
+              Easily view and manage your flight
+              bookings from one place.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p>&copy; 2024 AeroBook. All rights reserved.</p>
+      <footer className="footer">
+        <div>
+          <h3>✈ AeroBook</h3>
+          <p>
+            Your smarter way to travel.
+          </p>
         </div>
+
+        <p>
+          © 2026 AeroBook. All rights reserved.
+        </p>
       </footer>
+
     </div>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage
