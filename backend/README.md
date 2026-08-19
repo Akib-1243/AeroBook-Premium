@@ -1,13 +1,13 @@
 ﻿# AeroBook Backend API
 
-Laravel REST API backend for AeroBook with token-based authentication (Sanctum), MySQL schema based on the provided ERD, and Docker runtime.
+Laravel REST API backend for AeroBook with token-based authentication (Sanctum), a Microsoft SQL Server database, and Docker runtime.
 
 ## Stack
 
 - Laravel 13
 - Laravel Sanctum (Bearer token auth)
-- MySQL 8.4
-- Docker Compose (app + nginx + mysql)
+- Microsoft SQL Server 2022 Developer
+- Docker Compose (app + nginx + SQL Server)
 
 ## API Endpoints
 
@@ -66,7 +66,7 @@ Tables created by migrations:
 1. Build and start containers:
 
 ```bash
-docker compose up -d --build
+docker compose up -d --build --remove-orphans
 ```
 
 2. Generate app key (first run):
@@ -78,10 +78,17 @@ docker compose exec app php artisan key:generate
 3. Run migrations:
 
 ```bash
-docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate --force
 ```
 
 4. API is available at http://localhost:8000
+
+SQL Server is available to SSMS at `localhost,1433`:
+
+- Authentication: SQL Server Authentication
+- Login: `sa`
+- Password: `AeroBook_SqlServer_2026!`
+- Database: `aerobook`
 
 ## Local Non-Docker Run (optional)
 
@@ -103,7 +110,7 @@ php ../composer.phar install
 php artisan key:generate
 ```
 
-4. Set MySQL credentials in .env, then run migrations:
+4. Set SQL Server credentials in .env, then run migrations:
 
 ```bash
 php artisan migrate
@@ -117,5 +124,5 @@ php artisan serve
 
 ## Notes
 
-- In this environment, Docker CLI was not installed, so container startup and migrations could not be executed automatically.
+- SSMS is the client used to inspect and query the SQL Server database; the Docker SQL Server container is the database engine.
 - Composer was installed locally as ../composer.phar.

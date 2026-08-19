@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('flights', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('aircraft_id')->constrained('aircraft')->restrictOnDelete();
+            $table->foreignId('aircraft_id')->constrained('aircraft');
             $table->string('origin');
             $table->string('destination');
             $table->dateTime('departure');

@@ -1,0 +1,67 @@
+AeroBook Premium - Run After Laptop Restart
+==============================================
+
+1. Start Docker Desktop
+------------------------
+Open Docker Desktop and wait until it shows that Docker is running.
+
+2. Start the backend and SQL Server
+------------------------------------
+Open PowerShell and run:
+
+cd C:\Users\User\Documents\AeroBook-Premium\backend
+docker compose up -d
+
+Check the containers:
+
+docker compose ps
+
+Run migrations if needed:
+
+docker compose exec app php artisan migrate --force
+
+Backend URL:
+http://localhost:8000
+
+3. Connect with SSMS
+--------------------
+Open SQL Server Management Studio and use:
+
+Server name: localhost,1433
+Authentication: SQL Server Authentication
+Login: sa
+Password: AeroBook_SqlServer_2026!
+Database: aerobook
+
+If SSMS shows a certificate warning, enable Trust Server Certificate.
+
+4. Start the frontend
+----------------------
+Open a second PowerShell window and run:
+
+cd C:\Users\User\Documents\AeroBook-Premium\frontend
+npm install
+npm run dev
+
+Open the URL shown by Vite. It is usually:
+
+http://127.0.0.1:5173/
+
+If port 5173 is busy, Vite will use another port such as 5174. Open the URL shown in the terminal.
+
+5. Use the application
+----------------------
+- Register a new user.
+- Login with the registered account.
+- View the user in SSMS under:
+  aerobook > Tables > dbo.users
+
+The passenger record is stored in:
+  aerobook > Tables > dbo.passengers
+
+6. Stop the backend
+-------------------
+When finished, run:
+
+cd C:\Users\User\Documents\AeroBook-Premium\backend
+docker compose down

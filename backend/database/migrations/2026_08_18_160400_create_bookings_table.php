@@ -9,9 +9,9 @@ return new class extends Migration {
     {
         Schema::create('bookings', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('passenger_id')->constrained()->restrictOnDelete();
-            $table->foreignId('flight_id')->constrained()->restrictOnDelete();
-            $table->foreignId('seat_id')->constrained()->restrictOnDelete();
+            $table->foreignId('passenger_id')->constrained();
+            $table->foreignId('flight_id')->constrained();
+            $table->foreignId('seat_id')->constrained();
             $table->dateTime('timestamp')->useCurrent();
             $table->string('status', 30)->default('confirmed');
             $table->timestamps();
