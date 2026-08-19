@@ -43,7 +43,7 @@ function AppContent() {
         }
       />
       <Route path="/admin" element={<AdminDashboardPage />} />
-      <Route path="/" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
+      <Route path="/" element={<HomePage />} />
     </Routes>
   );
 }
