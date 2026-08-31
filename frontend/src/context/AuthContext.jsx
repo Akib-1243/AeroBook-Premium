@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAuthenticated = !!token && !!user;
+  const isAdmin = user?.role === 'admin';
 
   const value = {
     user,
@@ -103,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     isAuthenticated,
+    isAdmin,
     register,
     login,
     logout,

@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 700" width="100%" height="100%" style="background-color: #121212; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;">
+  <defs>
+    <style>
+      .entity-box { fill: #1e1e24; stroke: #3f3f46; stroke-width: 1.5; rx: 6px; }
+      .header-box { fill: #272730; stroke: #3f3f46; stroke-width: 1.5; }
+      .header-text { fill: #ffffff; font-weight: 700; font-size: 14px; text-anchor: middle; letter-spacing: 0.5px; }
+      .col-pkfk { fill: #a1a1aa; font-weight: 600; font-size: 11px; }
+      .col-type { fill: #71717a; font-size: 11px; }
+      .col-name { fill: #e4e4e7; font-size: 12px; font-weight: 500; }
+      .line { stroke: #64748b; stroke-width: 1.8; fill: none; }
+      .rel-label { fill: #a1a1aa; font-size: 11px; text-anchor: middle; font-style: italic; }
+      .rel-bg { fill: #18181b; rx: 3px; }
+      .grid-pattern { fill: none; stroke: #1f1f23; stroke-width: 1; }
+    </style>
+    
+    <marker id="many-end" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 1 L 10 6 L 0 11 M 10 1 L 10 11" fill="none" stroke="#64748b" stroke-width="1.8"/>
+    </marker>
+    <marker id="one-end" viewBox="0 0 12 12" refX="2" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 4 1 L 4 11 M 8 1 L 8 11" fill="none" stroke="#64748b" stroke-width="1.8"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" class="grid-pattern"/>
+  </pattern>
+  <rect width="100%" height="100%" fill="url(#grid)" />
+
+  <path d="M 120 400 L 120 180 L 260 180" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="135" y="270" width="60" height="18" class="rel-bg"/>
+  <text x="165" y="283" class="rel-label">requires</text>
+
+  <path d="M 220 490 L 260 490" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="222" y="478" width="70" height="18" class="rel-bg"/>
+  <text x="257" y="491" class="rel-label">assigned_to</text>
+
+  <path d="M 460 420 L 520 420 L 520 180 L 560 180" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="492" y="290" width="56" height="18" class="rel-bg"/>
+  <text x="520" y="303" class="rel-label">contains</text>
+
+  <path d="M 460 520 L 880 520 L 880 430" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="650" y="511" width="40" height="18" class="rel-bg"/>
+  <text x="670" y="524" class="rel-label">has</text>
+
+  <path d="M 760 330 L 840 330" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="775" y="321" width="50" height="18" class="rel-bg"/>
+  <text x="800" y="334" class="rel-label">places</text>
+
+  <path d="M 760 160 L 920 160 L 920 250" class="line" marker-start="url(#one-end)" marker-end="url(#many-end)"/>
+  <rect x="815" y="151" width="70" height="18" class="rel-bg"/>
+  <text x="850" y="164" class="rel-label">reserved_in</text>
+
+  <path d="M 1040 340 L 1140 340" class="line" marker-start="url(#one-end)" marker-end="url(#one-end)"/>
+  <rect x="1055" y="331" width="70" height="18" class="rel-bg"/>
+  <text x="1090" y="344" class="rel-label">generates</text>
+
+  <g transform="translate(20, 390)">
+    <rect width="200" height="200" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">AIRCRAFT</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">AircraftID</text>
+
+    <text x="45" y="90" class="col-type">string</text>
+    <text x="85" y="90" class="col-name">Model</text>
+
+    <text x="45" y="120" class="col-type">int</text>
+    <text x="85" y="120" class="col-name">Capacity</text>
+
+    <text x="45" y="150" class="col-type">float</text>
+    <text x="85" y="150" class="col-name">TotalFlightHours</text>
+
+    <text x="45" y="180" class="col-type">float</text>
+    <text x="85" y="180" class="col-name">MaintenanceThreshold</text>
+  </g>
+
+  <g transform="translate(260, 70)">
+    <rect width="200" height="190" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">MAINTENANCE_LOGS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">LogID</text>
+
+    <text x="12" y="90" class="col-pkfk">FK</text>
+    <text x="45" y="90" class="col-type">int</text>
+    <text x="85" y="90" class="col-name">AircraftID</text>
+
+    <text x="45" y="120" class="col-type">date</text>
+    <text x="85" y="120" class="col-name">Date</text>
+
+    <text x="45" y="150" class="col-type">string</text>
+    <text x="85" y="150" class="col-name">Description</text>
+
+    <text x="45" y="180" class="col-type">string</text>
+    <text x="85" y="180" class="col-name">Status</text>
+  </g>
+
+  <g transform="translate(260, 350)">
+    <rect width="200" height="240" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">FLIGHTS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">FlightID</text>
+
+    <text x="12" y="90" class="col-pkfk">FK</text>
+    <text x="45" y="90" class="col-type">int</text>
+    <text x="85" y="90" class="col-name">AircraftID</text>
+
+    <text x="45" y="120" class="col-type">string</text>
+    <text x="85" y="120" class="col-name">Origin</text>
+
+    <text x="45" y="150" class="col-type">string</text>
+    <text x="85" y="150" class="col-name">Destination</text>
+
+    <text x="45" y="180" class="col-type">datetime</text>
+    <text x="85" y="180" class="col-name">Departure</text>
+
+    <text x="45" y="210" class="col-type">datetime</text>
+    <text x="85" y="210" class="col-name">Arrival</text>
+
+    <text x="45" y="230" class="col-type">string</text>
+    <text x="85" y="230" class="col-name">Status</text>
+  </g>
+
+  <g transform="translate(560, 70)">
+    <rect width="200" height="190" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">SEATS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">SeatID</text>
+
+    <text x="12" y="90" class="col-pkfk">FK</text>
+    <text x="45" y="90" class="col-type">int</text>
+    <text x="85" y="90" class="col-name">FlightID</text>
+
+    <text x="45" y="120" class="col-type">string</text>
+    <text x="85" y="120" class="col-name">SeatNumber</text>
+
+    <text x="45" y="150" class="col-type">string</text>
+    <text x="85" y="150" class="col-name">SeatClass</text>
+
+    <text x="45" y="180" class="col-type">boolean</text>
+    <text x="85" y="180" class="col-name">IsBooked</text>
+  </g>
+
+  <g transform="translate(560, 300)">
+    <rect width="200" height="190" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">PASSENGERS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">PassengerID</text>
+
+    <text x="45" y="90" class="col-type">string</text>
+    <text x="85" y="90" class="col-name">Name</text>
+
+    <text x="45" y="120" class="col-type">string</text>
+    <text x="85" y="120" class="col-name">Email</text>
+
+    <text x="45" y="150" class="col-type">string</text>
+    <text x="85" y="150" class="col-name">Passport</text>
+
+    <text x="45" y="180" class="col-type">int</text>
+    <text x="85" y="180" class="col-name">FrequentFlyerPoints</text>
+  </g>
+
+  <g transform="translate(840, 250)">
+    <rect width="200" height="220" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">BOOKINGS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">BookingID</text>
+
+    <text x="12" y="90" class="col-pkfk">FK</text>
+    <text x="45" y="90" class="col-type">int</text>
+    <text x="85" y="90" class="col-name">PassengerID</text>
+
+    <text x="12" y="120" class="col-pkfk">FK</text>
+    <text x="45" y="120" class="col-type">int</text>
+    <text x="85" y="120" class="col-name">FlightID</text>
+
+    <text x="12" y="150" class="col-pkfk">FK</text>
+    <text x="45" y="150" class="col-type">int</text>
+    <text x="85" y="150" class="col-name">SeatID</text>
+
+    <text x="45" y="180" class="col-type">datetime</text>
+    <text x="85" y="180" class="col-name">Timestamp</text>
+
+    <text x="45" y="205" class="col-type">string</text>
+    <text x="85" y="205" class="col-name">Status</text>
+  </g>
+
+  <g transform="translate(1140, 250)">
+    <rect width="200" height="190" class="entity-box"/>
+    <path d="M 0 0 L 200 0 L 200 35 L 0 35 Z" class="header-box"/>
+    <text x="100" y="23" class="header-text">PAYMENTS</text>
+    
+    <text x="12" y="60" class="col-pkfk">PK</text>
+    <text x="45" y="60" class="col-type">int</text>
+    <text x="85" y="60" class="col-name">PaymentID</text>
+
+    <text x="12" y="90" class="col-pkfk">FK</text>
+    <text x="45" y="90" class="col-type">int</text>
+    <text x="85" y="90" class="col-name">BookingID</text>
+
+    <text x="45" y="120" class="col-type">decimal</text>
+    <text x="85" y="120" class="col-name">Amount</text>
+
+    <text x="45" y="150" class="col-type">datetime</text>
+    <text x="85" y="150" class="col-name">PaymentDate</text>
+
+    <text x="45" y="180" class="col-type">string</text>
+    <text x="85" y="180" class="col-name">Status</text>
+  </g>
+</svg>

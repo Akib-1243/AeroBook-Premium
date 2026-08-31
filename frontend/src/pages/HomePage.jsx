@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -22,8 +22,17 @@ function HomePage() {
         <div className="nav-links">
           <a href="/">Home</a>
           <a href="#">Flights</a>
-          <a href="#">My Bookings</a>
+          <a href="#" onClick={() => isAuthenticated && navigate('/my-bookings')}>My Bookings</a>
           <a href="#">About</a>
+          {isAdmin && (
+            <button
+              className="login-btn"
+              style={{ padding: '10px 20px', fontSize: '15px' }}
+              onClick={() => navigate('/admin')}
+            >
+              Admin Panel
+            </button>
+          )}
         </div>
 
         <div className="nav-buttons">

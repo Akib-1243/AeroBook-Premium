@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import MyBookingsPage from './pages/MyBookingsPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import './App.css';
 
@@ -27,9 +28,32 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-function AppContent() {
-  const { isAuthenticated } = useAuth();
+function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
+}
+
+function AppContent() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -42,7 +66,22 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
-      <Route path="/admin" element={<AdminDashboardPage />} />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminDashboardPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/my-bookings"
+        element={
+          <ProtectedRoute>
+            <MyBookingsPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/" element={<HomePage />} />
     </Routes>
   );
