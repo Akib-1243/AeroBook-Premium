@@ -4,6 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\FlightController;
+
+Route::get('/flights/search', [FlightController::class, 'search']);
+
+Route::get('/', function () {
+    return response()->json([
+        'application' => 'AeroBook API',
+        'status' => 'ok',
+    ]);
+});
 
 Route::prefix('auth')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
