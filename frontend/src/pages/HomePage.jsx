@@ -59,7 +59,7 @@ function HomePage() {
             My Bookings
           </a>
 
-          <a href="#">About</a>
+          <a href="#about">About</a>
 
           {isAdmin && (
             <button
@@ -372,6 +372,52 @@ function HomePage() {
             </p>
           </div>
 
+        </div>
+      </section>
+
+
+      <section className="about-section" id="about">
+        <div className="about-intro">
+          <p className="about-eyebrow">ABOUT AEROBOOK</p>
+          <h2>Travel planning that feels clear from takeoff to landing.</h2>
+          <p>
+            AeroBook is a flight booking platform that helps travelers search
+            available routes, choose seats, and manage reservations in one
+            simple place.
+          </p>
+          <button className="about-cta" onClick={() => navigate('/register')}>
+            Start Booking
+          </button>
+        </div>
+
+        <div className="about-details">
+          <div className="mission-block">
+            <p className="about-eyebrow">OUR MISSION</p>
+            <h3>Make every journey easier to begin.</h3>
+            <p>
+              We are building a more transparent booking experience, with
+              reliable availability and the details travelers need before they
+              commit to a trip.
+            </p>
+          </div>
+
+          <div className="team-block">
+            <p className="about-eyebrow">THE TEAM</p>
+            <div className="team-list">
+              <div>
+                <strong>Product</strong>
+                <span>Designing calmer journeys</span>
+              </div>
+              <div>
+                <strong>Engineering</strong>
+                <span>Building dependable bookings</span>
+              </div>
+              <div>
+                <strong>Support</strong>
+                <span>Here when plans change</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
