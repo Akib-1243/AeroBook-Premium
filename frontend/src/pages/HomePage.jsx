@@ -1,13 +1,40 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { searchFlights } from '../api/flights';
 
 function HomePage() {
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [passengers, setPassengers] = useState(1);
+  const [flights, setFlights] = useState([]);
+
   const { isAuthenticated, isAdmin, logout } = useAuth();
+
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleSearch = async () => {
+    try {
+      const result = await searchFlights({
+        origin,
+        destination,
+        date,
+        time,
+        passengers,
+      });
+
+      setFlights(result.data);
+      console.log(result.data);
+    } catch (error) {
+      console.error('Flight search failed:', error);
+    }
   };
 
   return (
@@ -22,8 +49,18 @@ function HomePage() {
         <div className="nav-links">
           <a href="/">Home</a>
           <a href="#">Flights</a>
-          <a href="#" onClick={() => isAuthenticated && navigate('/my-bookings')}>My Bookings</a>
+
+          <a
+            href="#"
+            onClick={() =>
+              isAuthenticated && navigate('/my-bookings')
+            }
+          >
+            My Bookings
+          </a>
+
           <a href="#">About</a>
+
           {isAdmin && (
             <button
               className="login-btn"
@@ -37,15 +74,25 @@ function HomePage() {
 
         <div className="nav-buttons">
           {isAuthenticated ? (
-            <button className="signup-btn" onClick={handleLogout}>
+            <button
+              className="signup-btn"
+              onClick={handleLogout}
+            >
               Logout
             </button>
           ) : (
             <>
-              <button className="login-btn" onClick={() => navigate('/login')}>
+              <button
+                className="login-btn"
+                onClick={() => navigate('/login')}
+              >
                 Login
               </button>
-              <button className="signup-btn" onClick={() => navigate('/register')}>
+
+              <button
+                className="signup-btn"
+                onClick={() => navigate('/register')}
+              >
                 Sign Up
               </button>
             </>
@@ -58,7 +105,9 @@ function HomePage() {
       <section className="hero-section">
 
         <div className="hero-content">
-          <p className="hero-label">YOUR JOURNEY STARTS HERE</p>
+          <p className="hero-label">
+            YOUR JOURNEY STARTS HERE
+          </p>
 
           <h1>
             Fly Beyond
@@ -82,12 +131,19 @@ function HomePage() {
 
             <div className="trip-type">
               <label>
-                <input type="radio" name="trip" defaultChecked />
+                <input
+                  type="radio"
+                  name="trip"
+                  defaultChecked
+                />
                 Round Trip
               </label>
 
               <label>
-                <input type="radio" name="trip" />
+                <input
+                  type="radio"
+                  name="trip"
+                />
                 One Way
               </label>
             </div>
@@ -96,52 +152,153 @@ function HomePage() {
 
           <div className="search-fields">
 
+            {/* From */}
             <div className="search-field">
               <label>From</label>
+
               <input
                 type="text"
                 placeholder="Departure city"
+                value={origin}
+                onChange={(e) =>
+                  setOrigin(e.target.value)
+                }
               />
             </div>
 
+
+            {/* Swap */}
             <div className="swap-icon">
               ⇄
             </div>
 
+
+            {/* To */}
             <div className="search-field">
               <label>To</label>
+
               <input
                 type="text"
                 placeholder="Destination city"
+                value={destination}
+                onChange={(e) =>
+                  setDestination(e.target.value)
+                }
               />
             </div>
 
+
+            {/* Departure Date */}
             <div className="search-field">
               <label>Departure</label>
+
               <input
                 type="date"
+                value={date}
+                onChange={(e) =>
+                  setDate(e.target.value)
+                }
               />
             </div>
 
+
+            {/* Departure Time */}
+            <div className="search-field">
+              <label>Departure Time</label>
+
+              <input
+                type="time"
+                value={time}
+                onChange={(e) =>
+                  setTime(e.target.value)
+                }
+              />
+            </div>
+
+
+            {/* Passengers */}
             <div className="search-field">
               <label>Passengers</label>
-              <select defaultValue="1">
-                <option value="1">1 Passenger</option>
-                <option value="2">2 Passengers</option>
-                <option value="3">3 Passengers</option>
-                <option value="4">4 Passengers</option>
-                <option value="5">5 Passengers</option>
+
+              <select
+                value={passengers}
+                onChange={(e) =>
+                  setPassengers(Number(e.target.value))
+                }
+              >
+                <option value="1">
+                  1 Passenger
+                </option>
+
+                <option value="2">
+                  2 Passengers
+                </option>
+
+                <option value="3">
+                  3 Passengers
+                </option>
+
+                <option value="4">
+                  4 Passengers
+                </option>
+
+                <option value="5">
+                  5 Passengers
+                </option>
               </select>
             </div>
 
-            <button className="search-btn">
+
+            {/* Search Button */}
+            <button
+              className="search-btn"
+              onClick={handleSearch}
+            >
               Search Flights
             </button>
 
           </div>
         </div>
-
       </section>
+
+
+      {/* Search Results */}
+      {flights.length > 0 && (
+        <section className="flight-results">
+          <h2>Available Flights</h2>
+
+          {flights.map((flight) => (
+            <div
+              className="flight-result-card"
+              key={flight.flight_id}
+            >
+              <h3>
+                {flight.origin} → {flight.destination}
+              </h3>
+
+              <p>
+                Flight ID: {flight.flight_id}
+              </p>
+
+              <p>
+                Departure: {flight.departure}
+              </p>
+
+              <p>
+                Arrival: {flight.arrival}
+              </p>
+
+              <p>
+                Aircraft: {flight.aircraft_model}
+              </p>
+
+              <p>
+                Available Seats: {flight.available_seats}
+              </p>
+            </div>
+          ))}
+        </section>
+      )}
 
 
       {/* Features Section */}
@@ -161,7 +318,9 @@ function HomePage() {
         <div className="feature-grid">
 
           <div className="feature-card">
-            <div className="feature-icon">✈</div>
+            <div className="feature-icon">
+              ✈
+            </div>
 
             <h3>Easy Flight Booking</h3>
 
@@ -173,7 +332,9 @@ function HomePage() {
 
 
           <div className="feature-card">
-            <div className="feature-icon">◉</div>
+            <div className="feature-icon">
+              ◉
+            </div>
 
             <h3>Real-Time Availability</h3>
 
@@ -185,7 +346,9 @@ function HomePage() {
 
 
           <div className="feature-card">
-            <div className="feature-icon">✓</div>
+            <div className="feature-icon">
+              ✓
+            </div>
 
             <h3>Secure Reservations</h3>
 
@@ -197,7 +360,9 @@ function HomePage() {
 
 
           <div className="feature-card">
-            <div className="feature-icon">▣</div>
+            <div className="feature-icon">
+              ▣
+            </div>
 
             <h3>Booking Management</h3>
 
@@ -208,14 +373,15 @@ function HomePage() {
           </div>
 
         </div>
-
       </section>
 
 
       {/* Footer */}
       <footer className="footer">
+
         <div>
           <h3>✈ AeroBook</h3>
+
           <p>
             Your smarter way to travel.
           </p>
@@ -224,10 +390,12 @@ function HomePage() {
         <p>
           © 2026 AeroBook. All rights reserved.
         </p>
+
       </footer>
 
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;
+
