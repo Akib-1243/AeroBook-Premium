@@ -301,6 +301,102 @@ select {
 }
 
 /* =========================
+   ABOUT
+========================= */
+
+.about-section {
+  padding: 90px 7%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 80px;
+  background: #f5f7fb;
+}
+
+.about-intro {
+  max-width: 650px;
+}
+
+.about-eyebrow {
+  margin: 0 0 14px;
+  color: #1769aa;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.about-intro h2 {
+  margin: 0 0 20px;
+  color: #102a43;
+  font-size: 42px;
+  line-height: 1.15;
+}
+
+.about-intro > p:not(.about-eyebrow),
+.mission-block p:not(.about-eyebrow) {
+  color: #596579;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.about-cta {
+  margin-top: 14px;
+  padding: 13px 22px;
+  border: 0;
+  border-radius: 8px;
+  background: #1769aa;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.about-cta:hover {
+  background: #12598f;
+}
+
+.about-details {
+  display: grid;
+  gap: 38px;
+  align-content: center;
+}
+
+.mission-block,
+.team-block {
+  padding-left: 26px;
+  border-left: 3px solid #b8d9f2;
+}
+
+.mission-block h3 {
+  margin: 0 0 10px;
+  color: #172033;
+  font-size: 24px;
+}
+
+.mission-block p:last-child {
+  margin-bottom: 0;
+}
+
+.team-list {
+  display: grid;
+  gap: 18px;
+}
+
+.team-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.team-list strong {
+  color: #172033;
+  font-size: 16px;
+}
+
+.team-list span {
+  color: #687386;
+  font-size: 14px;
+}
+
+/* =========================
    FOOTER
 ========================= */
 
@@ -381,6 +477,16 @@ select {
 
   .features-section {
     padding: 65px 5%;
+  }
+
+  .about-section {
+    grid-template-columns: 1fr;
+    gap: 45px;
+    padding: 65px 5%;
+  }
+
+  .about-intro h2 {
+    font-size: 32px;
   }
 
   .section-heading h2 {
