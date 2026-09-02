@@ -1,27 +1,33 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import KpiCard from '../../components/dashboard/KpiCard';
 import RevenueChart from '../../components/dashboard/RevenueChart';
 import OccupancyChart from '../../components/dashboard/OccupancyChart';
+import { getAdminDashboard } from '../../api/analytics';
 import '../../styles/AdminDashboard.css';
-
-const revenueData = [
-  { label: 'Mar', value: 12000 },
-  { label: 'Apr', value: 15500 },
-  { label: 'May', value: 11000 },
-  { label: 'Jun', value: 18200 },
-  { label: 'Jul', value: 21000 },
-  { label: 'Aug', value: 19500 },
-];
-
-const recentBookings = [
-  { id: 'BK-1042', passenger: 'Sarah Khan', flight: 'AB-204', status: 'Confirmed' },
-  { id: 'BK-1041', passenger: 'Tanvir Ahmed', flight: 'AB-118', status: 'Pending' },
-  { id: 'BK-1040', passenger: 'Nadia Islam', flight: 'AB-330', status: 'Confirmed' },
-  { id: 'BK-1039', passenger: 'Rafiq Hasan', flight: 'AB-204', status: 'Confirmed' },
-];
 
 function AdminDashboardPage() {
   const navigate = useNavigate();
+  const [dashboard, setDashboard] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    getAdminDashboard()
+      .then(setDashboard)
+      .catch((requestError) => setError(requestError.message || 'Unable to load dashboard data.'));
+  }, []);
+
+  if (error) {
+    return <div className="admin-dashboard"><p className="dashboard-error">{error}</p></div>;
+  }
+
+  if (!dashboard) {
+    return <div className="admin-dashboard"><p className="dashboard-loading">Loading dashboard...</p></div>;
+  }
+
+  const occupancy = dashboard.occupancy || { occupied: 0, available: 0 };
+  const revenue = dashboard.revenue || [];
+  const recentBookings = dashboard.recent_bookings || [];
 
   return (
     <div className="admin-dashboard">
@@ -34,15 +40,15 @@ function AdminDashboardPage() {
         <h2>Dashboard Overview</h2>
 
         <div className="kpi-row">
-          <KpiCard title="Total Flights" value="128" change="+8 this week" color="linear-gradient(135deg,#f97316,#f43f5e)" />
-          <KpiCard title="Active Bookings" value="452" change="+12% vs last week" color="linear-gradient(135deg,#3b82f6,#2563eb)" />
-          <KpiCard title="Revenue (This Month)" value="$19,500" change="+7% vs last month" color="linear-gradient(135deg,#10b981,#059669)" />
-          <KpiCard title="Fleet Aircraft" value="24" change="2 in maintenance" color="linear-gradient(135deg,#7c3aed,#4c1d95)" />
+          <KpiCard title="Total Flights" value={dashboard.total_flights} change="From live database" color="linear-gradient(135deg,#f97316,#f43f5e)" />
+          <KpiCard title="Active Bookings" value={dashboard.active_bookings} change="Confirmed or pending" color="linear-gradient(135deg,#3b82f6,#2563eb)" />
+          <KpiCard title="Revenue (This Month)" value={`$${Number(dashboard.monthly_revenue).toLocaleString()}`} change="Paid transactions" color="linear-gradient(135deg,#10b981,#059669)" />
+          <KpiCard title="Fleet Aircraft" value={dashboard.fleet_aircraft} change={`${dashboard.maintenance_aircraft || 0} in maintenance`} color="linear-gradient(135deg,#7c3aed,#4c1d95)" />
         </div>
 
         <div className="chart-row">
-          <RevenueChart data={revenueData} />
-          <OccupancyChart occupied={342} empty={110} />
+          <RevenueChart data={revenue} />
+          <OccupancyChart occupied={occupancy.occupied || 0} empty={occupancy.available || 0} />
         </div>
 
         <div className="table-card">
@@ -59,11 +65,11 @@ function AdminDashboardPage() {
             <tbody>
               {recentBookings.map((b) => (
                 <tr key={b.id}>
-                  <td>{b.id}</td>
+                  <td>BK-{b.id}</td>
                   <td>{b.passenger}</td>
                   <td>{b.flight}</td>
                   <td>
-                    <span className={`status-badge ${b.status === 'Confirmed' ? 'status-confirmed' : 'status-pending'}`}>
+                    <span className={`status-badge ${b.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}`}>
                       {b.status}
                     </span>
                   </td>

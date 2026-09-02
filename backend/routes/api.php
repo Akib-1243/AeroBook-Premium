@@ -2,10 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\FlightController;
 
 Route::get('/flights/search', [FlightController::class, 'search']);
+
+Route::get('/', function () {
+    return response()->json([
+        'application' => 'AeroBook API',
+        'status' => 'ok',
+    ]);
+});
 
 Route::prefix('auth')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
@@ -23,7 +31,5 @@ Route::middleware('auth:sanctum')->group(function (): void {
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function (): void {
-    Route::get('/dashboard', function () {
-        return response()->json(['message' => 'Admin dashboard data']);
-    });
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
 });
