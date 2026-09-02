@@ -9,37 +9,73 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
+    public function store(Request $request): JsonResponse
+    {
+        $flightId = (int) $request->input('flight_id');
+        $user = $request->user();
+        $now = now();
+
+        if (!$flightId) {
+            return response()->json(['message' => 'A flight is required.'], 422);
+        }
+
+        try {
+            $bookingId = DB::transaction(function () use ($flightId, $user, $now): int {
+                if (empty(DB::select($this->sql('booking_flight_exists.sql'), ['flight_id' => $flightId]))) {
+                    throw new \RuntimeException('This flight is no longer available.');
+                }
+
+                $passengerRows = DB::select($this->sql('booking_passenger.sql'), ['user_id' => $user->id]);
+                if (empty($passengerRows)) {
+                    $passengerRow = DB::selectOne($this->sql('booking_insert_passenger.sql'), [
+                        'user_id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'passport' => 'AUTO-' . $user->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+                    $passengerId = $passengerRow->id;
+                } else {
+                    $passengerId = $passengerRows[0]->id;
+                }
+
+                $seat = DB::selectOne($this->sql('booking_available_seat.sql'), ['flight_id' => $flightId]);
+
+                if (!$seat) {
+                    throw new \RuntimeException('No seats are available on this flight.');
+                }
+
+                DB::statement($this->sql('booking_update_seat.sql'), [
+                    'seat_id' => $seat->id,
+                    'updated_at' => $now,
+                ]);
+
+                $booking = DB::selectOne($this->sql('booking_insert.sql'), [
+                    'passenger_id' => $passengerId,
+                    'flight_id' => $flightId,
+                    'seat_id' => $seat->id,
+                    'booking_timestamp' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                return (int) $booking->id;
+            });
+        } catch (\RuntimeException $error) {
+            return response()->json(['message' => $error->getMessage()], 409);
+        }
+
+        return response()->json([
+            'message' => 'Flight booked successfully.',
+            'booking_id' => $bookingId,
+        ], 201);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
 
-        $bookings = DB::select(
-            "SELECT
-                b.id AS booking_id,
-                b.status AS booking_status,
-                b.timestamp AS booking_date,
-                f.id AS flight_id,
-                f.origin,
-                f.destination,
-                f.departure,
-                f.arrival,
-                f.status AS flight_status,
-                ac.model AS aircraft_model,
-                s.seat_number,
-                s.seat_class,
-                pmt.amount AS payment_amount,
-                pmt.status AS payment_status,
-                pmt.payment_date
-            FROM dbo.bookings b
-            INNER JOIN dbo.passengers pas ON pas.id = b.passenger_id
-            INNER JOIN dbo.flights f ON f.id = b.flight_id
-            INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
-            INNER JOIN dbo.seats s ON s.id = b.seat_id
-            LEFT JOIN dbo.payments pmt ON pmt.booking_id = b.id
-            WHERE pas.user_id = :user_id
-            ORDER BY b.timestamp DESC",
-            ['user_id' => $userId]
-        );
+        $bookings = DB::select($this->sql('booking_index.sql'), ['user_id' => $userId]);
 
         return response()->json([
             'data' => array_map(fn ($row) => $this->formatRow($row), $bookings),
@@ -50,32 +86,10 @@ class BookingController extends Controller
     {
         $userId = $request->user()->id;
 
-        $rows = DB::select(
-            "SELECT
-                b.id AS booking_id,
-                b.status AS booking_status,
-                b.timestamp AS booking_date,
-                f.id AS flight_id,
-                f.origin,
-                f.destination,
-                f.departure,
-                f.arrival,
-                f.status AS flight_status,
-                ac.model AS aircraft_model,
-                s.seat_number,
-                s.seat_class,
-                pmt.amount AS payment_amount,
-                pmt.status AS payment_status,
-                pmt.payment_date
-            FROM dbo.bookings b
-            INNER JOIN dbo.passengers pas ON pas.id = b.passenger_id
-            INNER JOIN dbo.flights f ON f.id = b.flight_id
-            INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
-            INNER JOIN dbo.seats s ON s.id = b.seat_id
-            LEFT JOIN dbo.payments pmt ON pmt.booking_id = b.id
-            WHERE b.id = :booking_id AND pas.user_id = :user_id",
-            ['booking_id' => $bookingId, 'user_id' => $userId]
-        );
+        $rows = DB::select($this->sql('booking_show.sql'), [
+            'booking_id' => $bookingId,
+            'user_id' => $userId,
+        ]);
 
         if (empty($rows)) {
             return response()->json(['message' => 'Booking not found.'], 404);
@@ -111,5 +125,10 @@ class BookingController extends Controller
                 'date'         => $row->payment_date,
             ],
         ];
+    }
+
+    private function sql(string $filename): string
+    {
+        return file_get_contents(database_path('sql/' . $filename));
     }
 }

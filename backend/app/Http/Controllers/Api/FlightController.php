@@ -13,7 +13,6 @@ class FlightController extends Controller
         $origin = $request->query('origin');
         $destination = $request->query('destination');
         $date = $request->query('date');
-        $time = $request->query('time');
         $passengers = (int) $request->query('passengers', 1);
 
         $flights = DB::select(
@@ -34,7 +33,6 @@ class FlightController extends Controller
             WHERE f.origin = :origin
               AND f.destination = :destination
               AND CAST(f.departure AS DATE) = :date
-              AND CAST(f.departure AS TIME) >= :time
               AND f.status = 'scheduled'
             GROUP BY
                 f.id,
@@ -51,7 +49,6 @@ class FlightController extends Controller
                 'origin' => $origin,
                 'destination' => $destination,
                 'date' => $date,
-                'time' => $time,
                 'passengers' => $passengers,
             ]
         );

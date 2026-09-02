@@ -1,39 +1,88 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { searchFlights } from '../api/flights';
+import { getAirports, searchFlights } from '../api/flights';
+import { createBooking } from '../api/bookings';
 
 function HomePage() {
+  const defaultDate = new Date();
+  defaultDate.setDate(defaultDate.getDate() + 1);
+  const defaultDateValue = [
+    defaultDate.getFullYear(),
+    String(defaultDate.getMonth() + 1).padStart(2, '0'),
+    String(defaultDate.getDate()).padStart(2, '0'),
+  ].join('-');
+
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [date, setDate] = useState(defaultDateValue);
   const [passengers, setPassengers] = useState(1);
   const [flights, setFlights] = useState([]);
+  const [airports, setAirports] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [bookingFlightId, setBookingFlightId] = useState(null);
 
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getAirports()
+      .then((result) => setAirports(result.data || []))
+      .catch((error) => console.error('Airport list failed:', error));
+  }, []);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  const handleBook = async (flightId) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    setBookingFlightId(flightId);
+    setSearchError('');
+
+    try {
+      await createBooking(flightId);
+      navigate('/my-bookings');
+    } catch (error) {
+      setSearchError(error.message || 'Booking failed.');
+    } finally {
+      setBookingFlightId(null);
+    }
+  };
+
   const handleSearch = async () => {
+    if (!origin || !destination) {
+      setSearchError('Choose a departure and destination city first.');
+      setHasSearched(true);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError('');
+    setHasSearched(true);
+
     try {
       const result = await searchFlights({
         origin,
         destination,
         date,
-        time,
         passengers,
       });
 
       setFlights(result.data);
-      console.log(result.data);
     } catch (error) {
-      console.error('Flight search failed:', error);
+      setFlights([]);
+      setSearchError(error.message || 'Flight search failed.');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -156,14 +205,19 @@ function HomePage() {
             <div className="search-field">
               <label>From</label>
 
-              <input
-                type="text"
-                placeholder="Departure city"
+              <select
                 value={origin}
                 onChange={(e) =>
                   setOrigin(e.target.value)
                 }
-              />
+              >
+                <option value="">Departure city</option>
+                {airports.map((airport) => (
+                  <option key={airport.id} value={airport.city}>
+                    {airport.city}
+                  </option>
+                ))}
+              </select>
             </div>
 
 
@@ -177,14 +231,19 @@ function HomePage() {
             <div className="search-field">
               <label>To</label>
 
-              <input
-                type="text"
-                placeholder="Destination city"
+              <select
                 value={destination}
                 onChange={(e) =>
                   setDestination(e.target.value)
                 }
-              />
+              >
+                <option value="">Destination city</option>
+                {airports.map((airport) => (
+                  <option key={airport.id} value={airport.city}>
+                    {airport.city}
+                  </option>
+                ))}
+              </select>
             </div>
 
 
@@ -197,20 +256,6 @@ function HomePage() {
                 value={date}
                 onChange={(e) =>
                   setDate(e.target.value)
-                }
-              />
-            </div>
-
-
-            {/* Departure Time */}
-            <div className="search-field">
-              <label>Departure Time</label>
-
-              <input
-                type="time"
-                value={time}
-                onChange={(e) =>
-                  setTime(e.target.value)
                 }
               />
             </div>
@@ -253,8 +298,9 @@ function HomePage() {
             <button
               className="search-btn"
               onClick={handleSearch}
+              disabled={isSearching}
             >
-              Search Flights
+              {isSearching ? 'Searching...' : 'Search Flights'}
             </button>
 
           </div>
@@ -263,38 +309,55 @@ function HomePage() {
 
 
       {/* Search Results */}
-      {flights.length > 0 && (
+      {hasSearched && (
         <section className="flight-results">
-          <h2>Available Flights</h2>
+          <h2>{flights.length > 0 ? 'Available Flights' : 'No Flights Found'}</h2>
+
+          {searchError && <p>{searchError}</p>}
+
+          {!searchError && flights.length === 0 && (
+            <p>No scheduled flights match this route and time.</p>
+          )}
 
           {flights.map((flight) => (
             <div
               className="flight-result-card"
               key={flight.flight_id}
             >
-              <h3>
-                {flight.origin} → {flight.destination}
-              </h3>
+              <div className="flight-card-header">
+                <div>
+                  <span className="flight-card-label">AeroBook flight</span>
+                  <h3>{flight.origin} <span>to</span> {flight.destination}</h3>
+                </div>
+                <span className="flight-status">{flight.flight_status}</span>
+              </div>
 
-              <p>
-                Flight ID: {flight.flight_id}
-              </p>
+              <div className="flight-card-details">
+                <div>
+                  <span className="flight-card-label">Departure</span>
+                  <strong>{new Date(flight.departure).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                  <small>{new Date(flight.departure).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small>
+                </div>
+                <div className="flight-card-line">&#8594;</div>
+                <div>
+                  <span className="flight-card-label">Arrival</span>
+                  <strong>{new Date(flight.arrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                  <small>{flight.aircraft_model}</small>
+                </div>
+                <div className="flight-card-seats">
+                  <span className="flight-card-label">Availability</span>
+                  <strong>{flight.available_seats} seats</strong>
+                  <small>of {flight.total_seats} total</small>
+                </div>
+              </div>
 
-              <p>
-                Departure: {flight.departure}
-              </p>
-
-              <p>
-                Arrival: {flight.arrival}
-              </p>
-
-              <p>
-                Aircraft: {flight.aircraft_model}
-              </p>
-
-              <p>
-                Available Seats: {flight.available_seats}
-              </p>
+              <button
+                className="search-btn"
+                onClick={() => handleBook(flight.flight_id)}
+                disabled={bookingFlightId === flight.flight_id}
+              >
+                {bookingFlightId === flight.flight_id ? 'Booking...' : 'Book Flight'}
+              </button>
             </div>
           ))}
         </section>

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyBookings } from '../api/bookings';
 
 function MyBookingsPage() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, isAdmin, logout, user } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,51 +59,37 @@ function MyBookingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <span className="text-2xl font-bold text-navy-700">✈️ AeroBook</span>
-            </div>
+      <nav className="navbar">
+        <div className="logo">✈ AeroBook</div>
 
-            <div className="flex items-center space-x-6">
-              <button
-                onClick={() => navigate('/home')}
-                className="text-gray-600 hover:text-blue-600 font-medium text-sm transition-colors"
-              >
-                Home
+        <div className="nav-links">
+          <a href="/">Home</a>
+          <a href="#">Flights</a>
+          <a href="/my-bookings">My Bookings</a>
+          <a href="#">About</a>
+
+          {isAdmin && (
+            <button className="login-btn" onClick={() => navigate('/admin')}>
+              Admin Panel
+            </button>
+          )}
+        </div>
+
+        <div className="nav-buttons">
+          {isAuthenticated ? (
+            <button className="signup-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <>
+              <button className="login-btn" onClick={() => navigate('/login')}>
+                Login
               </button>
-              <button
-                onClick={() => navigate('/my-bookings')}
-                className="text-blue-600 font-medium text-sm"
-              >
-                My Bookings
+              <button className="signup-btn" onClick={() => navigate('/register')}>
+                Sign Up
               </button>
-              {user?.role === 'admin' && (
-                <button
-                  onClick={() => navigate('/admin')}
-                  className="text-gray-600 hover:text-purple-600 font-medium text-sm transition-colors"
-                >
-                  Admin Panel
-                </button>
-              )}
-              <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm">
-                <div className="text-left">
-                  <div className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</div>
-                  <div className="text-[11px] text-gray-600">{user?.email || ''}</div>
-                  <div className="text-[10px] text-gray-500">
-                    Passport: {user?.passport || user?.passenger?.passport || 'No passport'}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </nav>
 
