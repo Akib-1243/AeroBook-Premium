@@ -87,6 +87,15 @@ function MyBookingsPage() {
                   Admin Panel
                 </button>
               )}
+              <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm">
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</div>
+                  <div className="text-[11px] text-gray-600">{user?.email || ''}</div>
+                  <div className="text-[10px] text-gray-500">
+                    Passport: {user?.passport || user?.passenger?.passport || 'No passport'}
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={handleLogout}
                 className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"

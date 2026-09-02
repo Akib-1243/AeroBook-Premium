@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -37,9 +37,18 @@ function HomePage() {
 
         <div className="nav-buttons">
           {isAuthenticated ? (
-            <button className="signup-btn" onClick={handleLogout}>
-              Logout
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left shadow-sm">
+                <div className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</div>
+                <div className="text-xs text-gray-600">{user?.email || ''}</div>
+                <div className="text-[10px] text-gray-500">
+                  Passport: {user?.passport || user?.passenger?.passport || 'N/A'}
+                </div>
+              </div>
+              <button className="signup-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
           ) : (
             <>
               <button className="login-btn" onClick={() => navigate('/login')}>

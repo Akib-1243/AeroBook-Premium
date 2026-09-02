@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\BookingController;
 
 Route::prefix('auth')->group(function (): void {
@@ -20,7 +21,5 @@ Route::middleware('auth:sanctum')->group(function (): void {
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function (): void {
-    Route::get('/dashboard', function () {
-        return response()->json(['message' => 'Admin dashboard data']);
-    });
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
 });
