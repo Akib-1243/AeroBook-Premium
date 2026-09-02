@@ -1,4 +1,3 @@
-/* Admin dashboard query: joins, COUNT/SUM aggregations, and monthly grouping. */
 SELECT dashboard_json = (
     SELECT
         (SELECT COUNT(*) FROM dbo.flights) AS total_flights,

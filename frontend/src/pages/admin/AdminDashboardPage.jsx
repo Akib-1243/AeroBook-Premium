@@ -26,7 +26,7 @@ function AdminDashboardPage() {
   }
 
   const occupancy = dashboard.occupancy || { occupied: 0, available: 0 };
-  const revenue = dashboard.revenue || [];
+  const revenueData = dashboard.revenue || [];
   const recentBookings = dashboard.recent_bookings || [];
 
   return (
@@ -47,7 +47,7 @@ function AdminDashboardPage() {
         </div>
 
         <div className="chart-row">
-          <RevenueChart data={revenue} />
+          <RevenueChart data={revenueData} />
           <OccupancyChart occupied={occupancy.occupied || 0} empty={occupancy.available || 0} />
         </div>
 
