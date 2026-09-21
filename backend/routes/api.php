@@ -20,6 +20,9 @@ Route::get('/', function () {
 Route::prefix('auth')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:20,1');
+    Route::post('/admin-login', [AuthController::class, 'adminLogin'])->middleware('throttle:20,1');
+    Route::post('/password/request-code', [AuthController::class, 'requestPasswordReset'])->middleware('throttle:5,1');
+    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1');
 
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout']);

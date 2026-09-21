@@ -9,6 +9,7 @@ function LoginPage() {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,7 +61,7 @@ function LoginPage() {
               Password
             </label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -68,6 +69,15 @@ function LoginPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              title={showPassword ? 'Hide password' : 'Show password'}
+              className="relative float-right -mt-8 mr-3 text-gray-500 hover:text-gray-800"
+            >
+              {showPassword ? '◉' : '◌'}
+            </button>
           </div>
 
           <button
@@ -90,6 +100,26 @@ function LoginPage() {
               Sign up
             </button>
           </p>
+        </div>
+
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => navigate('/admin-login')}
+            className="text-sm text-indigo-600 hover:underline bg-transparent border-0 cursor-pointer"
+          >
+            Admin login
+          </button>
+        </div>
+
+        <div className="mt-2 text-center">
+          <button
+            type="button"
+            onClick={() => navigate('/reset-password')}
+            className="text-sm text-gray-600 hover:text-gray-800 hover:underline bg-transparent border-0 cursor-pointer"
+          >
+            Forgot password?
+          </button>
         </div>
       </div>
     </div>

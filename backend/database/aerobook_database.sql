@@ -30,6 +30,23 @@ BEGIN
 END
 GO
 
+-- admins (separate administrator credentials)
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'admins')
+BEGIN
+    CREATE TABLE [dbo].[admins] (
+        [id]                  INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [name]                NVARCHAR(255)     NOT NULL,
+        [email]               NVARCHAR(255)     NOT NULL UNIQUE,
+        [email_verified_at]   DATETIMEOFFSET    NULL,
+        [password]            NVARCHAR(255)     NOT NULL,
+        [remember_token]      NVARCHAR(100)     NULL,
+        [role]                NVARCHAR(20)      NOT NULL DEFAULT 'admin',
+        [created_at]          DATETIMEOFFSET    NULL,
+        [updated_at]          DATETIMEOFFSET    NULL
+    );
+END
+GO
+
 -- password_reset_tokens
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'password_reset_tokens')
 BEGIN
@@ -291,9 +308,9 @@ GO
 --   akib.cse.20230204118@aust.edu → "Lollollol.1243;"
 -- (bcrypt cost 12 hashes)
 
-IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@aerobook.test')
+IF NOT EXISTS (SELECT 1 FROM admins WHERE email = 'admin@aerobook.test')
 BEGIN
-    INSERT INTO users (name, email, email_verified_at, password, role, created_at, updated_at)
+    INSERT INTO admins (name, email, email_verified_at, password, role, created_at, updated_at)
     VALUES ('Admin User', 'admin@aerobook.test', SYSDATETIMEOFFSET(),
             '$2y$12$NYjDhKQAiNs5wAgoENyh7OynefozrTjJtU1TtP82J7v/EvyjBGSlK', 'admin',
             SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET());
@@ -309,9 +326,9 @@ BEGIN
 END
 GO
 
-IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'akib.cse.20230204118@aust.edu')
+IF NOT EXISTS (SELECT 1 FROM admins WHERE email = 'akib.cse.20230204118@aust.edu')
 BEGIN
-    INSERT INTO users (name, email, email_verified_at, password, role, created_at, updated_at)
+    INSERT INTO admins (name, email, email_verified_at, password, role, created_at, updated_at)
     VALUES ('Md Akib', 'akib.cse.20230204118@aust.edu', SYSDATETIMEOFFSET(),
             '$2y$12$szrmbf4U5g9XHEugYUmCnOPWrZT92HDtt3SWXChp3ihewr4QcoUQe', 'admin',
             SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET());
@@ -319,27 +336,11 @@ END
 GO
 
 -- passengers for the seed users
-IF NOT EXISTS (SELECT 1 FROM passengers WHERE email = 'admin@aerobook.test')
-BEGIN
-    INSERT INTO passengers (user_id, name, email, passport, frequent_flyer_points, created_at, updated_at)
-    SELECT id, name, email, 'ADM1234567', 5000, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
-    FROM users WHERE email = 'admin@aerobook.test';
-END
-GO
-
 IF NOT EXISTS (SELECT 1 FROM passengers WHERE email = 'user@aerobook.test')
 BEGIN
     INSERT INTO passengers (user_id, name, email, passport, frequent_flyer_points, created_at, updated_at)
     SELECT id, name, email, 'TST1234567', 0, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
     FROM users WHERE email = 'user@aerobook.test';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM passengers WHERE email = 'akib.cse.20230204118@aust.edu')
-BEGIN
-    INSERT INTO passengers (user_id, name, email, passport, frequent_flyer_points, created_at, updated_at)
-    SELECT id, name, email, 'AUST30204118', 3200, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
-    FROM users WHERE email = 'akib.cse.20230204118@aust.edu';
 END
 GO
 
