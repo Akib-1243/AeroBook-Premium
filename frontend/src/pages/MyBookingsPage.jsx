@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyBookings } from '../api/bookings';
+import UserProfileMenu from '../components/UserProfileMenu';
 
 function MyBookingsPage() {
   const { isAuthenticated, isAdmin, logout, user } = useAuth();
@@ -24,11 +25,6 @@ function MyBookingsPage() {
 
     fetchBookings();
   }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
@@ -77,9 +73,7 @@ function MyBookingsPage() {
 
         <div className="nav-buttons">
           {isAuthenticated ? (
-            <button className="signup-btn" onClick={handleLogout}>
-              Logout
-            </button>
+            <UserProfileMenu />
           ) : (
             <>
               <button className="login-btn" onClick={() => navigate('/login')}>
@@ -95,6 +89,11 @@ function MyBookingsPage() {
 
       {/* Page content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link to="/home" className="info-back-link profile-back-link inline-flex mb-6">
+          <span className="info-back-icon" aria-hidden="true">←</span>
+          <span>Back to AeroBook</span>
+        </Link>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
           <p className="mt-2 text-gray-600">

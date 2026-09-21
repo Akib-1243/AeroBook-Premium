@@ -7,6 +7,9 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import ProfilePage from './pages/ProfilePage';
+import InformationPage from './pages/InformationPage';
+import SocialLoginPage from './pages/SocialLoginPage';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -63,6 +66,21 @@ function AppContent() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/home" element={<HomePage />} />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/refund-policy" element={<InformationPage />} />
+      <Route path="/terms" element={<InformationPage />} />
+      <Route path="/emi-policy" element={<InformationPage />} />
+      <Route path="/privacy-policy" element={<InformationPage />} />
+      <Route path="/about-us" element={<InformationPage />} />
+      <Route path="/experience-center" element={<InformationPage />} />
+      <Route path="/social-login/:platform" element={<SocialLoginPage />} />
       <Route
         path="/admin"
         element={
