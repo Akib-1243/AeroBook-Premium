@@ -89,3 +89,14 @@ export const getCurrentUser = async () => {
     throw error.response?.data || error;
   }
 };
+
+export const updateProfile = async (profileData) => {
+  try {
+    const response = await axiosClient.put('/auth/profile', profileData);
+    const user = normalizeStoredUser(response.data.user);
+    localStorage.setItem('user', JSON.stringify(user));
+    return { ...response.data, user };
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

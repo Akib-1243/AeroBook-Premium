@@ -155,6 +155,49 @@ class AuthController extends Controller
         ]);
     }
 
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'passport' => ['required', 'string', 'max:50'],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $now = Carbon::now();
+
+        DB::transaction(function () use ($data, $user, $now): void {
+            DB::update(
+                'UPDATE users SET name = :name, email = :email, phone = :phone, updated_at = :updated_at WHERE id = :id',
+                [
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'] ?? null,
+                    'updated_at' => $now,
+                    'id' => $user->id,
+                ]
+            );
+
+            DB::update(
+                'UPDATE passengers SET name = :name, email = :email, passport = :passport, phone = :phone, updated_at = :updated_at WHERE user_id = :user_id',
+                [
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'passport' => $data['passport'] ?? null,
+                    'phone' => $data['phone'] ?? null,
+                    'updated_at' => $now,
+                    'user_id' => $user->id,
+                ]
+            );
+        });
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => $this->serializeUserWithPassenger($user->id),
+        ]);
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -267,7 +310,7 @@ class AuthController extends Controller
     private function serializeUserWithPassenger(int $userId): array
     {
         $userRow = DB::select(
-            "SELECT id, name, email, email_verified_at, role, created_at, updated_at
+            "SELECT id, name, email, email_verified_at, role, phone, created_at, updated_at
              FROM users WHERE id = :id",
             ['id' => $userId]
         );
@@ -285,6 +328,7 @@ class AuthController extends Controller
             'name'              => $user->name ?? null,
             'email'             => $user->email ?? null,
             'role'              => $user->role ?? 'user',
+            'phone'             => $user->phone ?? null,
             'email_verified_at' => $user->email_verified_at ?? null,
             'created_at'        => $user->created_at ?? null,
             'updated_at'        => $user->updated_at ?? null,

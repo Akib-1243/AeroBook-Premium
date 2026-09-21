@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getAirports, searchFlights } from '../api/flights';
 import { createBooking } from '../api/bookings';
+import SiteFooter from '../components/SiteFooter';
+import UserProfileMenu from '../components/UserProfileMenu';
 
 function HomePage() {
   const defaultDate = new Date();
@@ -33,11 +35,6 @@ function HomePage() {
       .then((result) => setAirports(result.data || []))
       .catch((error) => console.error('Airport list failed:', error));
   }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
 
   const handleBook = async (flightId) => {
     if (!isAuthenticated) {
@@ -108,7 +105,7 @@ function HomePage() {
             My Bookings
           </a>
 
-          <a href="#">About</a>
+          <Link to="/about-us">About</Link>
 
           {isAdmin && (
             <button
@@ -123,12 +120,7 @@ function HomePage() {
 
         <div className="nav-buttons">
           {isAuthenticated ? (
-            <button
-              className="signup-btn"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+            <UserProfileMenu />
           ) : (
             <>
               <button
@@ -439,22 +431,7 @@ function HomePage() {
       </section>
 
 
-      {/* Footer */}
-      <footer className="footer">
-
-        <div>
-          <h3>✈ AeroBook</h3>
-
-          <p>
-            Your smarter way to travel.
-          </p>
-        </div>
-
-        <p>
-          © 2026 AeroBook. All rights reserved.
-        </p>
-
-      </footer>
+      <SiteFooter />
 
     </div>
   );

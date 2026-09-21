@@ -9,6 +9,7 @@ const normalizeUser = (user) => {
   return {
     ...user,
     passport: user.passport ?? user.passenger?.passport ?? null,
+    phone: user.phone ?? user.passenger?.phone ?? '',
   };
 };
 
@@ -114,6 +115,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      setError(null);
+      const response = await authAPI.updateProfile(profileData);
+      if (response.user) setUser(normalizeUser(response.user));
+      return response;
+    } catch (err) {
+      setError(err.message || 'Profile update failed');
+      throw err;
+    }
+  };
+
   const isAuthenticated = !!token && !!user;
   const isAdmin = user?.role === 'admin';
 
@@ -128,6 +141,7 @@ export const AuthProvider = ({ children }) => {
     login,
     adminLogin,
     logout,
+    updateProfile,
   };
 
   return (
