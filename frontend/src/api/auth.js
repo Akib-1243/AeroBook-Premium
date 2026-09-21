@@ -37,6 +37,20 @@ export const login = async (credentials) => {
   }
 };
 
+export const adminLogin = async (credentials) => {
+  try {
+    const response = await axiosClient.post('/auth/admin-login', credentials);
+    const token = response.data.access_token || response.data.token;
+    if (token) {
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('user', JSON.stringify(normalizeStoredUser(response.data.user)));
+    }
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const logout = async () => {
   try {
     await axiosClient.post('/auth/logout');
@@ -45,6 +59,25 @@ export const logout = async () => {
   } finally {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
+  }
+};
+
+export const requestPasswordReset = async (resetRequest) => {
+  try {
+    const payload = typeof resetRequest === 'string' ? { email: resetRequest } : resetRequest;
+    const response = await axiosClient.post('/auth/password/request-code', payload);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const resetPassword = async (resetData) => {
+  try {
+    const response = await axiosClient.post('/auth/password/reset', resetData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
   }
 };
 

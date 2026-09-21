@@ -80,6 +80,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const adminLogin = async (credentials) => {
+    try {
+      setError(null);
+      setLoading(true);
+      const response = await authAPI.adminLogin(credentials);
+      const normalizedToken = response.access_token || response.token;
+
+      if (normalizedToken) setToken(normalizedToken);
+      if (response.user) setUser(normalizeUser(response.user));
+
+      return response;
+    } catch (err) {
+      setError(err.message || 'Admin login failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       setError(null);
@@ -107,6 +126,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     register,
     login,
+    adminLogin,
     logout,
   };
 

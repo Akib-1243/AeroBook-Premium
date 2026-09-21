@@ -1,4 +1,23 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api';
+
+export const buildFlightSearchParams = ({
+  origin,
+  destination,
+  date,
+  time,
+  passengers,
+}) => {
+  const safePassengers = Number(passengers) > 0 ? Number(passengers) : 1;
+  const params = new URLSearchParams();
+
+  if (origin) params.set('origin', origin);
+  if (destination) params.set('destination', destination);
+  if (date) params.set('date', date);
+  if (time) params.set('time', time);
+  params.set('passengers', String(safePassengers));
+
+  return params;
+};
 
 export const getAirports = async () => {
   const response = await fetch(`${API_BASE_URL}/airports`);
@@ -17,12 +36,12 @@ export const searchFlights = async ({
   time,
   passengers,
 }) => {
-  const params = new URLSearchParams({
+  const params = buildFlightSearchParams({
     origin,
     destination,
     date,
     time,
-    passengers: String(passengers),
+    passengers,
   });
 
   const response = await fetch(
