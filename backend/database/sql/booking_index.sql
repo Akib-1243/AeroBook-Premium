@@ -13,7 +13,9 @@ SELECT
     s.seat_class,
     pmt.amount AS payment_amount,
     pmt.status AS payment_status,
-    pmt.payment_date
+    pmt.payment_date,
+    pmt.gateway AS payment_gateway,
+    pmt.transaction_reference AS payment_reference
 FROM dbo.bookings b
 INNER JOIN dbo.passengers pas ON pas.id = b.passenger_id
 INNER JOIN dbo.flights f ON f.id = b.flight_id

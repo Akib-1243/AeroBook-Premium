@@ -6,18 +6,38 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\Payments\SandboxPaymentGateway;
 
 class BookingController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, SandboxPaymentGateway $gateway): JsonResponse
     {
         $data = $request->validate([
             'flight_id' => ['required', 'integer'],
             'traveler_id' => ['nullable', 'integer'],
+            'payment_method_id' => ['required', 'integer'],
         ]);
         $flightId = (int) $data['flight_id'];
         $user = $request->user();
         $now = now();
+        $paymentMethod = DB::table('saved_payment_methods')
+            ->where('id', $data['payment_method_id'])
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        if (! $paymentMethod) {
+            return response()->json(['message' => 'Choose a valid saved payment method.'], 422);
+        }
+
+        $flight = DB::table('flights')->where('id', $flightId)->where('status', 'scheduled')->first(['base_fare', 'currency']);
+        if (! $flight) {
+            return response()->json(['message' => 'This flight is no longer available.'], 409);
+        }
+        if ($flight->currency !== 'USD') {
+            return response()->json(['message' => 'Sandbox checkout currently supports USD only.'], 422);
+        }
+        $amountMinor = (int) round(((float) $flight->base_fare) * 100);
 
         $savedTraveler = null;
         if (! empty($data['traveler_id'])) {
@@ -34,7 +54,7 @@ class BookingController extends Controller
         $profile = $savedTraveler ?? DB::table('traveler_profiles')->where('user_id', $user->id)->first();
 
         try {
-            $bookingId = DB::transaction(function () use ($flightId, $user, $now, $profile, $savedTraveler): int {
+            $bookingId = DB::transaction(function () use ($flightId, $user, $now, $profile, $savedTraveler, $paymentMethod, $amountMinor, $gateway): int {
                 if (empty(DB::select($this->sql('booking_flight_exists.sql'), ['flight_id' => $flightId]))) {
                     throw new \RuntimeException('This flight is no longer available.');
                 }
@@ -74,6 +94,23 @@ class BookingController extends Controller
                     'updated_at' => $now,
                 ]);
 
+                $charge = $gateway->charge($paymentMethod, $amountMinor);
+                if (! in_array($charge['status'], ['completed', 'pending', 'success'], true)) {
+                    throw new \RuntimeException($charge['message'] ?? 'This payment method could not be processed.');
+                }
+
+                DB::table('payments')->insert([
+                    'booking_id' => $booking->id,
+                    'amount' => number_format($charge['amount_minor'] / 100, 2, '.', ''),
+                    'payment_date' => $now,
+                    'status' => $charge['status'],
+                    'gateway' => 'sandbox',
+                    'transaction_reference' => $charge['reference'],
+                    'payment_method_id' => $paymentMethod->id,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+
                 $nameParts = preg_split('/\s+/', trim($user->name), 2) ?: [];
                 DB::table('booking_traveler_snapshots')->insert([
                     'booking_id' => $booking->id,
@@ -101,8 +138,9 @@ class BookingController extends Controller
         }
 
         return response()->json([
-            'message' => 'Flight booked successfully.',
+            'message' => 'Sandbox payment approved. Flight booked; no real money was charged.',
             'booking_id' => $bookingId,
+            'gateway' => 'sandbox',
         ], 201);
     }
 
@@ -166,6 +204,8 @@ class BookingController extends Controller
                 'amount'       => $row->payment_amount,
                 'status'       => $row->payment_status,
                 'date'         => $row->payment_date,
+                'gateway'      => $row->payment_gateway ?? null,
+                'reference'    => $row->payment_reference ?? null,
             ],
         ];
     }

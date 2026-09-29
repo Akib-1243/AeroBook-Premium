@@ -1526,6 +1526,665 @@ select {
   font-size: 13px;
 }
 
+.booking-account-shell {
+  min-height: 100vh;
+  background: #f4f8fc;
+}
+
+.booking-account-page {
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: 36px 28px 80px;
+}
+
+.booking-account-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 22px 0 28px;
+}
+
+.booking-account-heading h1 {
+  margin: 0;
+  color: #172033;
+  font-size: 36px;
+}
+
+.booking-account-heading p:last-child {
+  margin: 8px 0 0;
+  color: #687386;
+  font-size: 15px;
+}
+
+.booking-find-flight,
+.booking-account-empty button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #1769aa;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-account-nav {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  border-bottom: 1px solid #dfe7ef;
+  scrollbar-width: thin;
+}
+
+.booking-account-nav button {
+  flex: 0 0 auto;
+  padding: 15px 2px 13px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #687386;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-account-nav button.active,
+.booking-account-nav button:hover {
+  border-bottom-color: #1769aa;
+  color: #1769aa;
+}
+
+.booking-account-content {
+  margin-top: 24px;
+  padding: 26px;
+  border: 1px solid #e2eaf2;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 32px rgba(23, 32, 51, 0.05);
+}
+
+.booking-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.booking-section-title h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 22px;
+}
+
+.booking-section-title p {
+  margin: 5px 0 0;
+  color: #687386;
+  font-size: 13px;
+}
+
+.account-refresh-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #d8e1eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #1769aa;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.booking-filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.booking-filter-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #556174;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-filter-tabs button.active {
+  border-color: #a8cee8;
+  background: #eff8fd;
+  color: #145f98;
+}
+
+.booking-filter-tabs button span {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #edf1f5;
+  color: #556174;
+  font-size: 11px;
+}
+
+.booking-account-list,
+.refund-request-list,
+.saved-payment-list {
+  display: grid;
+  gap: 14px;
+}
+
+.booking-account-card,
+.refund-request-card {
+  padding: 20px;
+  border: 1px solid #e2eaf2;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.booking-account-card-top,
+.refund-request-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.booking-account-kicker {
+  color: #1769aa;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.booking-account-card h3,
+.refund-request-heading h3 {
+  margin: 6px 0 0;
+  color: #172033;
+  font-size: 19px;
+}
+
+.booking-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.account-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 99px;
+  background: #f1f4f7;
+  color: #586477;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.account-status-good {
+  background: #eaf6ee;
+  color: #237344;
+}
+
+.account-status-pending {
+  background: #fff5df;
+  color: #8d6516;
+}
+
+.account-status-bad {
+  background: #fff0ef;
+  color: #ad3434;
+}
+
+.booking-account-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.booking-account-details > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.booking-account-details span {
+  color: #7a8495;
+  font-size: 11px;
+}
+
+.booking-account-details strong {
+  overflow-wrap: anywhere;
+  color: #283548;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.booking-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #edf1f5;
+  color: #7a8495;
+  font-size: 12px;
+}
+
+.account-danger-link {
+  padding: 6px 3px;
+  border: 0;
+  background: transparent;
+  color: #ad3434;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-danger-link:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.booking-account-empty {
+  display: grid;
+  justify-items: center;
+  padding: 52px 18px;
+  text-align: center;
+}
+
+.booking-account-empty > span {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: #eaf5fc;
+  color: #1769aa;
+  font-size: 25px;
+}
+
+.booking-account-empty h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+}
+
+.booking-account-empty p {
+  max-width: 440px;
+  margin: 8px 0 18px;
+  color: #687386;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.account-table-wrap {
+  overflow-x: auto;
+}
+
+.account-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.account-table th {
+  padding: 12px;
+  border-bottom: 1px solid #dfe7ef;
+  color: #687386;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.account-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid #edf1f5;
+  color: #344054;
+  font-size: 13px;
+}
+
+.saved-payment-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 17px;
+  border: 1px solid #e2eaf2;
+  border-radius: 10px;
+}
+
+.payment-card-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 52px;
+  height: 38px;
+  border: 1px solid #dfe7ef;
+  border-radius: 6px;
+  color: #1769aa;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.saved-payment-info {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 6px;
+}
+
+.saved-payment-info > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.saved-payment-info strong {
+  color: #283548;
+  font-size: 14px;
+}
+
+.saved-payment-info > span {
+  color: #687386;
+  font-size: 12px;
+}
+
+.account-default-tag {
+  padding: 4px 7px;
+  border-radius: 99px;
+  background: #eff8fd;
+  color: #1769aa;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.gateway-notice {
+  margin-top: 18px;
+  padding: 16px;
+  border-left: 3px solid #55a0cf;
+  background: #f2f8fc;
+}
+
+.gateway-notice strong {
+  color: #24445c;
+  font-size: 13px;
+}
+
+.gateway-notice p,
+.refund-explainer {
+  margin: 6px 0 0;
+  color: #687386;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.gateway-test-card-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.gateway-test-card {
+  display: inline-flex;
+  padding: 6px 8px;
+  border: 1px solid #d7e8f3;
+  border-radius: 6px;
+  background: #fff;
+  color: #36576d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sandbox-card-form {
+  display: grid;
+  gap: 17px;
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #dfe7ef;
+  border-radius: 10px;
+  background: #fbfdff;
+}
+
+.sandbox-card-form h3 {
+  margin: 5px 0 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.sandbox-card-form p {
+  margin: 6px 0 0;
+  color: #687386;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sandbox-card-grid,
+.booking-add-card-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sandbox-card-grid label,
+.booking-add-card-fields label {
+  display: grid;
+  gap: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sandbox-card-grid input,
+.sandbox-card-grid select,
+.booking-add-card-fields input,
+.booking-add-card-fields select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid #d8e1eb;
+  border-radius: 7px;
+  outline: none;
+  background: #fff;
+  color: #172033;
+  font: inherit;
+  font-weight: 400;
+}
+
+.sandbox-card-grid input:focus,
+.sandbox-card-grid select:focus,
+.booking-add-card-fields input:focus,
+.booking-add-card-fields select:focus {
+  border-color: #58a7d9;
+  box-shadow: 0 0 0 3px rgba(88, 167, 217, 0.15);
+}
+
+.sandbox-default-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #556174;
+  font-size: 12px;
+}
+
+.sandbox-default-check input {
+  accent-color: #1769aa;
+}
+
+.sandbox-card-form > button {
+  justify-self: start;
+}
+
+.saved-payment-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-secondary-link {
+  padding: 6px 3px;
+  border: 0;
+  background: transparent;
+  color: #1769aa;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-secondary-link:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.account-table td strong {
+  display: block;
+  max-width: 190px;
+  overflow: hidden;
+  color: #344054;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.transaction-gateway {
+  display: block;
+  margin-top: 4px;
+  color: #7a8495;
+  font-size: 10px;
+  text-transform: capitalize;
+}
+
+.flight-card-fare {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.flight-card-fare strong {
+  color: #1769aa;
+  font-size: 20px;
+}
+
+.flight-card-fare small {
+  color: #687386;
+  font-size: 11px;
+}
+
+.booking-checkout-payment {
+  display: grid;
+  gap: 13px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e6edf3;
+}
+
+.booking-checkout-payment > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.booking-checkout-payment > div:first-child strong {
+  color: #172033;
+  font-size: 15px;
+}
+
+.booking-add-card-details {
+  padding: 13px;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+}
+
+.booking-add-card-details summary {
+  color: #1769aa;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-add-card-details > p {
+  margin: 10px 0;
+  color: #687386;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.booking-add-card-fields {
+  margin-bottom: 12px;
+}
+
+.refund-explainer {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid #edf1f5;
+}
+
+.account-feedback {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.account-feedback-error {
+  background: #fff0ef;
+  color: #9f302a;
+}
+
+.account-feedback-success {
+  background: #eaf6ee;
+  color: #237344;
+}
+
+.account-feedback button {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.account-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  color: #687386;
+  font-size: 14px;
+}
+
+.account-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #d9eaf5;
+  border-top-color: #1769aa;
+  border-radius: 50%;
+  animation: account-spin 0.8s linear infinite;
+}
+
+@keyframes account-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* =========================
    RESPONSIVE
 ========================= */
@@ -1703,6 +2362,75 @@ select {
 
   .booking-modal-actions button {
     width: 100%;
+  }
+
+  .booking-account-page {
+    padding: 28px 16px 55px;
+  }
+
+  .booking-account-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .booking-account-heading h1 {
+    font-size: 30px;
+  }
+
+  .booking-account-content {
+    padding: 18px 14px;
+  }
+
+  .booking-account-nav {
+    gap: 18px;
+  }
+
+  .booking-account-nav button {
+    font-size: 13px;
+  }
+
+  .booking-filter-tabs {
+    overflow-x: auto;
+  }
+
+  .booking-account-card,
+  .refund-request-card {
+    padding: 16px;
+  }
+
+  .booking-account-card-top,
+  .refund-request-heading {
+    flex-direction: column;
+  }
+
+  .booking-card-footer {
+    align-items: flex-start;
+  }
+
+  .saved-payment-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .saved-payment-info {
+    flex-basis: calc(100% - 70px);
+  }
+
+  .saved-payment-card .account-danger-link {
+    margin-left: 68px;
+  }
+
+  .sandbox-card-grid,
+  .booking-add-card-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-payment-actions {
+    margin-left: 68px;
+  }
+
+  .flight-card-fare {
+    text-align: left;
   }
 }
 

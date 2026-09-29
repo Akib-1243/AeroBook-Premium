@@ -86,6 +86,26 @@ docker compose exec app php artisan migrate --force
 Password reset emails are captured in the local Mailpit inbox at http://localhost:8025.
 This development inbox does not deliver messages to real Gmail accounts.
 
+### Sandbox Transaction Gateway
+
+The booking and saved-payment-method flows use an internal development sandbox. It creates opaque payment-method tokens and simulated receipts/refunds; it does not connect to a card network and never moves real money. Card numbers and security codes are discarded after tokenization and are not stored in AeroBook tables.
+
+Seed the demo gateway account and sample transaction with:
+
+```bash
+docker compose exec app php artisan db:seed --force
+```
+
+Demo sign-in: `test@example.com` / `password`
+
+Sandbox cards accepted by the tokenization form:
+
+- `4242 4242 4242 4242` simulates approval.
+- `4000 0000 0000 0002` simulates a decline.
+- Use any future expiry and a 3-digit security code. Do not enter a real card.
+
+Real payment processing requires integrating a PCI-compliant hosted/tokenized gateway and configuring its credentials/webhooks.
+
 SQL Server is available to SSMS at `localhost,1433`:
 
 - Authentication: SQL Server Authentication
