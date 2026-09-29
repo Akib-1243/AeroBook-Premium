@@ -23,6 +23,8 @@ class FlightController extends Controller
                 f.departure,
                 f.arrival,
                 f.status AS flight_status,
+                f.base_fare,
+                f.currency,
                 ac.model AS aircraft_model,
                 ac.capacity,
                 COUNT(s.id) AS total_seats,
@@ -41,6 +43,8 @@ class FlightController extends Controller
                 f.departure,
                 f.arrival,
                 f.status,
+                f.base_fare,
+                f.currency,
                 ac.model,
                 ac.capacity
             HAVING SUM(CASE WHEN s.is_booked = 0 THEN 1 ELSE 0 END) >= :passengers
