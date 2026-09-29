@@ -67,6 +67,9 @@ return [
 
     'timezone' => 'UTC',
 
+    // How long a "book now, pay later" seat stays held before it goes back on sale.
+    'booking_hold_minutes' => (int) env('BOOKING_HOLD_MINUTES', 1440),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

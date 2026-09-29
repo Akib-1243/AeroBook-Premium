@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAirports, searchFlights } from '../api/flights';
-import { createBooking } from '../api/bookings';
 import SiteFooter from '../components/SiteFooter';
 import UserProfileMenu from '../components/UserProfileMenu';
 
@@ -24,7 +23,6 @@ function HomePage() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
-  const [bookingFlightId, setBookingFlightId] = useState(null);
 
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
@@ -36,23 +34,8 @@ function HomePage() {
       .catch((error) => console.error('Airport list failed:', error));
   }, []);
 
-  const handleBook = async (flightId) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
-    setBookingFlightId(flightId);
-    setSearchError('');
-
-    try {
-      await createBooking(flightId);
-      navigate('/my-bookings');
-    } catch (error) {
-      setSearchError(error.message || 'Booking failed.');
-    } finally {
-      setBookingFlightId(null);
-    }
+  const handleBook = (flightId) => {
+    navigate(`/flights/${flightId}/seats?passengers=${passengers}`);
   };
 
   const handleSearch = async () => {
@@ -346,9 +329,8 @@ function HomePage() {
               <button
                 className="search-btn"
                 onClick={() => handleBook(flight.flight_id)}
-                disabled={bookingFlightId === flight.flight_id}
               >
-                {bookingFlightId === flight.flight_id ? 'Booking...' : 'Book Flight'}
+                Choose Seats
               </button>
             </div>
           ))}

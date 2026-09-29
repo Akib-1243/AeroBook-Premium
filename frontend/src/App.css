@@ -1292,3 +1292,240 @@ select {
     grid-template-columns: repeat(3, 62px);
   }
 }
+/* =========================
+   SEAT MAP (Improvement Plan 3.2)
+   Colour + symbol per status: never colour alone.
+========================= */
+
+.seat-selection {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 60px;
+}
+
+.seat-selection__header h1 {
+  margin: 12px 0 6px;
+  color: #123c69;
+}
+
+.seat-selection__header p {
+  margin: 0;
+  color: #4c566a;
+}
+
+.seat-selection__back {
+  color: #1769aa;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.seat-selection__error {
+  color: #b42318;
+  font-size: 14px;
+}
+
+.seat-selection__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 28px;
+  margin-top: 24px;
+  align-items: start;
+}
+
+.seat-selection__cabin {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.seat-map {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 24px 12px;
+  background: #ffffff;
+  border: 2px solid #d5dbe5;
+  border-radius: 90px 90px 24px 24px;
+}
+
+.seat-map__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seat-map__header {
+  color: #6b7385;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.seat-map__slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seat-map__letter {
+  width: 34px;
+  text-align: center;
+}
+
+.seat-map__aisle {
+  width: 26px;
+  text-align: center;
+  color: #6b7385;
+  font-size: 12px;
+}
+
+.seat-map__exit {
+  width: 34px;
+  text-align: center;
+}
+
+.seat-exit-label {
+  color: #d92d20;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.seat {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px 7px 4px 4px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.seat:focus-visible {
+  outline: 3px solid #1769aa;
+  outline-offset: 2px;
+}
+
+.seat--available { background: #dcfce7; border: 1px solid #16a34a; color: #14532d; }
+.seat--available:hover { transform: scale(1.08); }
+.seat--selected  { background: #2563eb; border: 1px solid #1d4ed8; color: #ffffff; }
+.seat--booked    { background: #fde68a; border: 1px solid #d97706; color: #78350f; cursor: not-allowed; }
+.seat--sold      { background: #d1d5db; border: 1px solid #9ca3af; color: #374151; cursor: not-allowed; }
+.seat--blocked   { background: #374151; border: 1px solid #1f2937; color: #ffffff; cursor: not-allowed; }
+.seat--xl        { border: 2px solid #7c3aed; }
+.seat--none      { visibility: hidden; cursor: default; }
+.seat--sample    { cursor: default; flex-shrink: 0; }
+
+.seat-legend,
+.seat-summary {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.seat-legend h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #123c69;
+}
+
+.seat-legend ul,
+.seat-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.seat-legend li {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.seat-legend li .seat,
+.seat-legend li .seat-exit-label {
+  grid-row: span 2;
+  justify-self: center;
+}
+
+.seat-legend small {
+  color: #6b7385;
+  font-size: 12px;
+}
+
+.seat-summary {
+  margin-top: 16px;
+}
+
+.seat-summary__counter {
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+.seat-summary li {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef1f5;
+  font-size: 14px;
+}
+
+.seat-summary li span {
+  margin-left: auto;
+  color: #4c566a;
+}
+
+.seat-summary__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.seat-summary__actions button {
+  width: 100%;
+  margin: 0;
+}
+
+.seat-summary__actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.seat-summary__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #4c566a;
+}
+
+.seat-map-empty {
+  color: #4c566a;
+}
+
+@media (max-width: 900px) {
+  .seat-selection__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .seat,
+  .seat-map__letter,
+  .seat-map__exit {
+    width: 28px;
+  }
+
+  .seat {
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .seat-map__aisle {
+    width: 18px;
+  }
+}

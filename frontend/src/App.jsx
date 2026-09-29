@@ -10,6 +10,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import InformationPage from './pages/InformationPage';
 import SocialLoginPage from './pages/SocialLoginPage';
+import SeatSelectionPage from './pages/SeatSelectionPage';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -66,6 +67,7 @@ function AppContent() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/home" element={<HomePage />} />
+      <Route path="/flights/:flightId/seats" element={<SeatSelectionPage />} />
       <Route
         path="/profile"
         element={

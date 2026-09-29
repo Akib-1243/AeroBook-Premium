@@ -1,30 +1,49 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
-import { getMyBookings } from '../api/bookings';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getMyBookings, payBooking } from '../api/bookings';
 import UserProfileMenu from '../components/UserProfileMenu';
 
 function MyBookingsPage() {
   const { isAuthenticated, isAdmin, logout, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState(location.state?.notice || '');
+  const [payingId, setPayingId] = useState(null);
+
+  const fetchBookings = async () => {
+    try {
+      const response = await getMyBookings();
+      setBookings(response.data || []);
+    } catch (err) {
+      setError(err?.message || 'Failed to load bookings.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const response = await getMyBookings();
-        setBookings(response.data || []);
-      } catch (err) {
-        setError(err?.message || 'Failed to load bookings.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBookings();
   }, []);
+
+  // Pay for a booking that was reserved with "Book (pay later)".
+  const handlePay = async (bookingId) => {
+    setPayingId(bookingId);
+    setError('');
+    setNotice('');
+    try {
+      const result = await payBooking(bookingId);
+      setNotice(result.message);
+    } catch (err) {
+      setError(err?.message || 'Payment could not be completed.');
+    } finally {
+      setPayingId(null);
+      fetchBookings();
+    }
+  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
@@ -44,6 +63,8 @@ function MyBookingsPage() {
       confirmed: 'bg-green-100 text-green-800',
       pending: 'bg-amber-100 text-amber-800',
       cancelled: 'bg-red-100 text-red-800',
+      expired: 'bg-red-100 text-red-800',
+      paid: 'bg-green-100 text-green-800',
       refunded: 'bg-gray-100 text-gray-800',
       completed: 'bg-blue-100 text-blue-800',
     };
@@ -103,6 +124,12 @@ function MyBookingsPage() {
           </p>
         </div>
 
+        {notice && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-700 text-sm">{notice}</p>
+          </div>
+        )}
+
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700 text-sm">{error}</p>
@@ -131,7 +158,8 @@ function MyBookingsPage() {
                       </span>
                       <div className="mt-1 flex items-center gap-3">
                         {getStatusBadge(booking.status)}
-                        {getStatusBadge(booking.payment?.status || 'pending')}
+                        {booking.status !== 'expired' &&
+                          getStatusBadge(booking.payment?.status || 'unpaid')}
                       </div>
                     </div>
                     <div className="text-right">
@@ -195,6 +223,22 @@ function MyBookingsPage() {
                       <p className="text-xs text-gray-500">Paid</p>
                     </div>
                   </div>
+
+                  {booking.status === 'pending' && (
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                      <p className="text-sm text-amber-700">
+                        Seat held until {formatDate(booking.hold_expires_at)}. Pay before then to get your ticket.
+                      </p>
+                      <button
+                        type="button"
+                        className="search-btn"
+                        disabled={payingId === booking.id}
+                        onClick={() => handlePay(booking.id)}
+                      >
+                        {payingId === booking.id ? 'Processing…' : 'Pay now'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

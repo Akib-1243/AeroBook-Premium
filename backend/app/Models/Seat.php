@@ -16,12 +16,20 @@ class Seat extends Model
         'seat_number',
         'seat_class',
         'is_booked',
+        'status',
+        'seat_type',
+        'position',
+        'row_no',
+        'seat_letter',
+        'surcharge',
     ];
 
     protected function casts(): array
     {
         return [
             'is_booked' => 'boolean',
+            'row_no' => 'integer',
+            'surcharge' => 'decimal:2',
         ];
     }
 

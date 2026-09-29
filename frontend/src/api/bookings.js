@@ -9,9 +9,21 @@ export const getMyBookings = async () => {
   }
 };
 
-export const createBooking = async (flightId) => {
+// mode 'book' holds the seats until paid; 'buy' pays now and tickets immediately.
+export const createBooking = async (flightId, seatIds = [], mode = 'book') => {
   try {
-    const response = await axiosClient.post('/bookings', { flight_id: flightId });
+    const payload = { flight_id: flightId, mode };
+    if (seatIds.length) payload.seat_ids = seatIds;
+    const response = await axiosClient.post('/bookings', payload);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const payBooking = async (bookingId) => {
+  try {
+    const response = await axiosClient.post(`/bookings/${bookingId}/pay`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

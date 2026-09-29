@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +17,8 @@ class FlightController extends Controller
         $date = $request->query('date');
         $passengers = (int) $request->query('passengers', 1);
 
+        Booking::releaseExpiredHolds();
+
         $flights = DB::select(
             "SELECT
                 f.id AS flight_id,
@@ -26,7 +30,7 @@ class FlightController extends Controller
                 ac.model AS aircraft_model,
                 ac.capacity,
                 COUNT(s.id) AS total_seats,
-                SUM(CASE WHEN s.is_booked = 0 THEN 1 ELSE 0 END) AS available_seats
+                SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) AS available_seats
             FROM dbo.flights f
             INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
             LEFT JOIN dbo.seats s ON s.flight_id = f.id
@@ -43,7 +47,7 @@ class FlightController extends Controller
                 f.status,
                 ac.model,
                 ac.capacity
-            HAVING SUM(CASE WHEN s.is_booked = 0 THEN 1 ELSE 0 END) >= :passengers
+            HAVING SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) >= :passengers
             ORDER BY f.departure ASC",
             [
                 'origin' => $origin,
@@ -55,6 +59,44 @@ class FlightController extends Controller
 
         return response()->json([
             'data' => $flights,
+        ]);
+    }
+
+    // Seat map with live status per seat (colour legend, Improvement Plan 3.2).
+    public function seatmap(int $flightId): JsonResponse
+    {
+        $flight = DB::selectOne(
+            'SELECT f.id, f.origin, f.destination, f.departure, f.arrival, f.status,
+                    ac.model AS aircraft_model
+             FROM dbo.flights f
+             INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
+             WHERE f.id = :flight_id',
+            ['flight_id' => $flightId]
+        );
+
+        if (! $flight) {
+            return response()->json(['message' => 'Flight not found.'], 404);
+        }
+
+        Booking::releaseExpiredHolds();
+        $seats = DB::select(
+            file_get_contents(database_path('sql/flight_seatmap.sql')),
+            ['flight_id' => $flightId]
+        );
+
+        return response()->json([
+            'flight' => $flight,
+            'seats' => array_map(fn ($seat) => [
+                'id' => (int) $seat->id,
+                'number' => $seat->number,
+                'row' => (int) $seat->row,
+                'letter' => $seat->letter,
+                'class' => $seat->class,
+                'type' => $seat->type,
+                'position' => $seat->position,
+                'status' => $seat->status,
+                'surcharge' => (float) $seat->surcharge,
+            ], $seats),
         ]);
     }
 }
