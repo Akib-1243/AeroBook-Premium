@@ -1132,6 +1132,400 @@ select {
   opacity: 0.65;
 }
 
+.profile-section-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 0 -30px;
+  padding: 0 30px;
+  border-bottom: 1px solid #edf1f5;
+  scrollbar-width: thin;
+}
+
+.profile-section-nav a {
+  flex: 0 0 auto;
+  padding: 15px 12px 13px;
+  border-bottom: 3px solid transparent;
+  color: #687386;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.profile-section-nav a:hover,
+.profile-section-nav a.active {
+  border-bottom-color: #1769aa;
+  color: #1769aa;
+}
+
+.profile-form-grid select,
+.profile-form-grid input,
+.profile-inline-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d8e1eb;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #172033;
+  font: inherit;
+  font-weight: 400;
+}
+
+.profile-form-grid select:focus,
+.profile-form-grid input:focus,
+.profile-inline-form input:focus {
+  border-color: #58a7d9;
+  box-shadow: 0 0 0 3px rgba(88, 167, 217, 0.15);
+}
+
+.profile-field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-field input,
+.profile-field select {
+  box-sizing: border-box;
+}
+
+.profile-inline-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 18px 0;
+}
+
+.profile-inline-form .profile-field {
+  width: min(100%, 360px);
+}
+
+.profile-verification-row,
+.profile-security-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.profile-verification-row > div,
+.profile-security-block > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.profile-verification-row strong,
+.profile-security-block h3,
+.profile-form h3,
+.profile-delete-block h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 16px;
+}
+
+.profile-verification-row p,
+.profile-security-block p,
+.profile-delete-block p {
+  margin: 0;
+  color: #687386;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.profile-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.profile-status-good {
+  background: #eef8f0;
+  color: #287344;
+}
+
+.profile-secondary-button,
+.profile-text-button {
+  padding: 9px 12px;
+  border: 1px solid #b7d8ee;
+  border-radius: 8px;
+  background: #fff;
+  color: #1769aa;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.profile-traveler-list {
+  margin-top: 20px;
+  border-top: 1px solid #edf1f5;
+}
+
+.profile-traveler-row,
+.profile-session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.profile-traveler-row > div:first-child,
+.profile-session-row > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.profile-traveler-row strong,
+.profile-session-row strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.profile-traveler-row span,
+.profile-session-row small {
+  overflow-wrap: anywhere;
+  color: #687386;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.profile-row-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-text-button {
+  padding: 7px 9px;
+  border-color: transparent;
+}
+
+.profile-danger-text {
+  color: #ad3434;
+}
+
+.profile-traveler-form,
+.profile-security-section > .profile-form {
+  padding-top: 24px;
+}
+
+.profile-traveler-form h3,
+.profile-security-section .profile-form h3 {
+  margin-bottom: 18px;
+}
+
+.profile-empty-state,
+.profile-loading {
+  padding: 22px 0;
+  color: #687386;
+  font-size: 14px;
+}
+
+.profile-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf1f5;
+  color: #344054;
+}
+
+.profile-toggle-row span {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-toggle-row small {
+  color: #687386;
+  font-size: 12px;
+}
+
+.profile-toggle-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: #1769aa;
+}
+
+.profile-session-block {
+  display: block;
+}
+
+.profile-session-block > div:first-child {
+  margin-bottom: 8px;
+}
+
+.profile-session-row {
+  align-items: flex-start;
+}
+
+.profile-delete-block {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #f0c7c7;
+  border-radius: 12px;
+  background: #fffafa;
+}
+
+.profile-delete-block .profile-form-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.profile-delete-button {
+  justify-self: start;
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 8px;
+  background: #b42318;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-delete-button:disabled {
+  opacity: 0.6;
+}
+
+.booking-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(19, 32, 48, 0.58);
+}
+
+.booking-traveler-modal {
+  position: relative;
+  width: min(100%, 520px);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  padding: 30px;
+  border: 1px solid #e2eaf2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 35, 55, 0.24);
+}
+
+.booking-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f8;
+  color: #344054;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.booking-traveler-modal h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 25px;
+}
+
+.booking-traveler-modal > p:not(.profile-eyebrow) {
+  margin: 9px 0 20px;
+  color: #687386;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.booking-traveler-options {
+  display: grid;
+  gap: 8px;
+}
+
+.booking-traveler-options label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #d8e1eb;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.booking-traveler-options label.selected {
+  border-color: #1769aa;
+  background: #f0f8fd;
+}
+
+.booking-traveler-options input {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: #1769aa;
+}
+
+.booking-traveler-options label span {
+  display: grid;
+  gap: 4px;
+}
+
+.booking-traveler-options strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.booking-traveler-options small {
+  color: #687386;
+  font-size: 12px;
+}
+
+.booking-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.booking-modal-cancel {
+  padding: 11px 15px;
+  border: 1px solid #d8e1eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #344054;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.booking-modal-error {
+  margin: 14px 0 0;
+  color: #a03e3e;
+  font-size: 13px;
+}
+
 /* =========================
    RESPONSIVE
 ========================= */
@@ -1272,6 +1666,43 @@ select {
   .profile-form-footer {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .profile-section-nav {
+    margin: 0 -22px;
+    padding: 0 22px;
+  }
+
+  .profile-inline-form,
+  .profile-verification-row,
+  .profile-traveler-row,
+  .profile-session-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-inline-form .profile-field {
+    width: 100%;
+  }
+
+  .profile-delete-block {
+    padding: 16px;
+  }
+
+  .profile-delete-block .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-traveler-modal {
+    padding: 24px 18px;
+  }
+
+  .booking-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .booking-modal-actions button {
+    width: 100%;
   }
 }
 

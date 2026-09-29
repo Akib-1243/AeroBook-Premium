@@ -9,9 +9,12 @@ export const getMyBookings = async () => {
   }
 };
 
-export const createBooking = async (flightId) => {
+export const createBooking = async (flightId, travelerId = null) => {
   try {
-    const response = await axiosClient.post('/bookings', { flight_id: flightId });
+    const response = await axiosClient.post('/bookings', {
+      flight_id: flightId,
+      traveler_id: travelerId || null,
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

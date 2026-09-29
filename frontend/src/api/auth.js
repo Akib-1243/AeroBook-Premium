@@ -92,7 +92,7 @@ export const getCurrentUser = async () => {
 
 export const updateProfile = async (profileData) => {
   try {
-    const response = await axiosClient.put('/auth/profile', profileData);
+    const response = await axiosClient.put('/profile/details', profileData);
     const user = normalizeStoredUser(response.data.user);
     localStorage.setItem('user', JSON.stringify(user));
     return { ...response.data, user };

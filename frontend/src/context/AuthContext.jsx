@@ -115,6 +115,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const clearAuth = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setError(null);
+  };
+
   const updateProfile = async (profileData) => {
     try {
       setError(null);
@@ -141,6 +149,7 @@ export const AuthProvider = ({ children }) => {
     login,
     adminLogin,
     logout,
+    clearAuth,
     updateProfile,
   };
 

@@ -31,7 +31,7 @@ class AuthController extends Controller
                 [
                     'name'         => $data['name'],
                     'email'        => $data['email'],
-                    'verified_at'  => $now,
+                    'verified_at'  => null,
                     'password'     => $hashedPassword,
                     'role'         => 'user',
                     'created'      => $now,
@@ -90,15 +90,15 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Revoke all previous tokens for this user via raw SQL
-        DB::delete(
-            "DELETE FROM personal_access_tokens
-             WHERE tokenable_type = :type AND tokenable_id = :id",
-            ['type' => User::class, 'id' => $rows[0]->id]
-        );
-
         $user = User::findOrFail($rows[0]->id);
         $token = $user->createToken('auth-token')->plainTextToken;
+
+        DB::table('account_login_history')->insert([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => substr((string) $request->userAgent(), 0, 2000),
+            'logged_in_at' => Carbon::now(),
+        ]);
 
         return response()->json([
             'message'      => 'Login successful.',
