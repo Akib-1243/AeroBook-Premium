@@ -67,7 +67,7 @@ function AppContent() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/home" element={<HomePage />} />
       <Route
-        path="/profile"
+        path="/profile/:section?"
         element={
           <ProtectedRoute>
             <ProfilePage />

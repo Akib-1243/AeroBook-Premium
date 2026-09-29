@@ -83,6 +83,9 @@ docker compose exec app php artisan migrate --force
 
 4. API is available at http://localhost:8000
 
+Password reset emails are captured in the local Mailpit inbox at http://localhost:8025.
+This development inbox does not deliver messages to real Gmail accounts.
+
 SQL Server is available to SSMS at `localhost,1433`:
 
 - Authentication: SQL Server Authentication

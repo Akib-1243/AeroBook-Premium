@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAirports, searchFlights } from '../api/flights';
 import { createBooking } from '../api/bookings';
+import { getProfileDetails } from '../api/profile';
 import SiteFooter from '../components/SiteFooter';
 import UserProfileMenu from '../components/UserProfileMenu';
 
@@ -25,8 +26,11 @@ function HomePage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [bookingFlightId, setBookingFlightId] = useState(null);
+  const [bookingCandidate, setBookingCandidate] = useState(null);
+  const [savedTravelers, setSavedTravelers] = useState([]);
+  const [selectedTravelerId, setSelectedTravelerId] = useState('');
 
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin, user } = useAuth();
 
   const navigate = useNavigate();
 
@@ -46,7 +50,25 @@ function HomePage() {
     setSearchError('');
 
     try {
-      await createBooking(flightId);
+      const result = await getProfileDetails();
+      setSavedTravelers(result.travelers || []);
+      setSelectedTravelerId('');
+      setBookingCandidate(flights.find((flight) => flight.flight_id === flightId) || { flight_id: flightId });
+    } catch (error) {
+      setSearchError(error.message || 'Traveler details could not be loaded.');
+    } finally {
+      setBookingFlightId(null);
+    }
+  };
+
+  const confirmBooking = async (event) => {
+    event.preventDefault();
+    if (!bookingCandidate) return;
+
+    setBookingFlightId(bookingCandidate.flight_id);
+    setSearchError('');
+    try {
+      await createBooking(bookingCandidate.flight_id, selectedTravelerId || null);
       navigate('/my-bookings');
     } catch (error) {
       setSearchError(error.message || 'Booking failed.');
@@ -348,11 +370,43 @@ function HomePage() {
                 onClick={() => handleBook(flight.flight_id)}
                 disabled={bookingFlightId === flight.flight_id}
               >
-                {bookingFlightId === flight.flight_id ? 'Booking...' : 'Book Flight'}
+                {bookingFlightId === flight.flight_id ? 'Loading travelers...' : 'Book Flight'}
               </button>
             </div>
           ))}
         </section>
+      )}
+
+      {bookingCandidate && (
+        <div className="booking-modal-backdrop" onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !bookingFlightId) setBookingCandidate(null);
+        }}>
+          <section className="booking-traveler-modal" role="dialog" aria-modal="true" aria-labelledby="booking-traveler-title">
+            <button type="button" className="booking-modal-close" aria-label="Close traveler selection" onClick={() => setBookingCandidate(null)}>×</button>
+            <p className="profile-eyebrow">PASSENGER DETAILS</p>
+            <h2 id="booking-traveler-title">Who is traveling?</h2>
+            <p>Select the traveler for this reservation. The details are saved with the booking.</p>
+            <form onSubmit={confirmBooking}>
+              <div className="booking-traveler-options">
+                <label className={selectedTravelerId === '' ? 'selected' : ''}>
+                  <input type="radio" name="booking-traveler" value="" checked={selectedTravelerId === ''} onChange={() => setSelectedTravelerId('')} />
+                  <span><strong>{user?.name || 'Me'}</strong><small>My profile details</small></span>
+                </label>
+                {savedTravelers.map((traveler) => (
+                  <label className={String(selectedTravelerId) === String(traveler.id) ? 'selected' : ''} key={traveler.id}>
+                    <input type="radio" name="booking-traveler" value={traveler.id} checked={String(selectedTravelerId) === String(traveler.id)} onChange={() => setSelectedTravelerId(String(traveler.id))} />
+                    <span><strong>{traveler.title ? `${traveler.title} ` : ''}{traveler.first_name} {traveler.last_name}</strong><small>{traveler.nationality || 'Saved traveler'}{traveler.passport_number ? ` · Passport ending ${traveler.passport_number.slice(-4)}` : ''}</small></span>
+                  </label>
+                ))}
+              </div>
+              {searchError && <p className="booking-modal-error" role="alert">{searchError}</p>}
+              <div className="booking-modal-actions">
+                <button type="button" className="booking-modal-cancel" onClick={() => setBookingCandidate(null)} disabled={Boolean(bookingFlightId)}>Cancel</button>
+                <button type="submit" className="search-btn" disabled={Boolean(bookingFlightId)}>{bookingFlightId ? 'Booking...' : 'Continue booking'}</button>
+              </div>
+            </form>
+          </section>
+        </div>
       )}
 
 

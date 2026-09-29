@@ -133,6 +133,11 @@ function MyBookingsPage() {
                         {getStatusBadge(booking.status)}
                         {getStatusBadge(booking.payment?.status || 'pending')}
                       </div>
+                      {booking.traveler && (
+                        <p className="mt-2 text-xs text-gray-600">
+                          Traveler: {booking.traveler.title ? `${booking.traveler.title} ` : ''}{booking.traveler.first_name} {booking.traveler.last_name}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <span className="text-xs text-gray-500">Booking Date</span>

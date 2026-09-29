@@ -11,16 +11,30 @@ class BookingController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
-        $flightId = (int) $request->input('flight_id');
+        $data = $request->validate([
+            'flight_id' => ['required', 'integer'],
+            'traveler_id' => ['nullable', 'integer'],
+        ]);
+        $flightId = (int) $data['flight_id'];
         $user = $request->user();
         $now = now();
 
-        if (!$flightId) {
-            return response()->json(['message' => 'A flight is required.'], 422);
+        $savedTraveler = null;
+        if (! empty($data['traveler_id'])) {
+            $savedTraveler = DB::table('saved_travelers')
+                ->where('id', $data['traveler_id'])
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (! $savedTraveler) {
+                return response()->json(['message' => 'Saved traveler not found.'], 404);
+            }
         }
 
+        $profile = $savedTraveler ?? DB::table('traveler_profiles')->where('user_id', $user->id)->first();
+
         try {
-            $bookingId = DB::transaction(function () use ($flightId, $user, $now): int {
+            $bookingId = DB::transaction(function () use ($flightId, $user, $now, $profile, $savedTraveler): int {
                 if (empty(DB::select($this->sql('booking_flight_exists.sql'), ['flight_id' => $flightId]))) {
                     throw new \RuntimeException('This flight is no longer available.');
                 }
@@ -59,6 +73,27 @@ class BookingController extends Controller
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
+
+                $nameParts = preg_split('/\s+/', trim($user->name), 2) ?: [];
+                DB::table('booking_traveler_snapshots')->insert([
+                    'booking_id' => $booking->id,
+                    'source_saved_traveler_id' => $savedTraveler?->id,
+                    'title' => $profile->title ?? null,
+                    'first_name' => $profile->first_name ?? ($nameParts[0] ?? 'Traveler'),
+                    'last_name' => $profile->last_name ?? ($nameParts[1] ?? ''),
+                    'date_of_birth' => $profile->date_of_birth ?? null,
+                    'gender' => $profile->gender ?? null,
+                    'nationality' => $profile->nationality ?? null,
+                    'passport_number' => $profile->passport_number ?? null,
+                    'passport_issuing_country' => $profile->passport_issuing_country ?? null,
+                    'passport_issue_date' => $profile->passport_issue_date ?? null,
+                    'passport_expiry_date' => $profile->passport_expiry_date ?? null,
+                    'national_id' => $profile->national_id ?? null,
+                    'visa_information' => $profile->visa_information ?? null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+
                 return (int) $booking->id;
             });
         } catch (\RuntimeException $error) {
@@ -102,6 +137,8 @@ class BookingController extends Controller
 
     private function formatRow(object $row): array
     {
+        $traveler = DB::table('booking_traveler_snapshots')->where('booking_id', $row->booking_id)->first();
+
         return [
             'id'            => $row->booking_id,
             'status'        => $row->booking_status,
@@ -119,6 +156,12 @@ class BookingController extends Controller
                 'number'       => $row->seat_number,
                 'class'        => $row->seat_class,
             ],
+            'traveler'      => $traveler ? [
+                'title' => $traveler->title,
+                'first_name' => $traveler->first_name,
+                'last_name' => $traveler->last_name,
+                'passport_number' => $traveler->passport_number,
+            ] : null,
             'payment'       => [
                 'amount'       => $row->payment_amount,
                 'status'       => $row->payment_status,

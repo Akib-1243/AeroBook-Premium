@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AirportController;
 use App\Http\Controllers\Api\BookingController;
@@ -32,6 +33,18 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile/details', [ProfileController::class, 'update']);
+    Route::post('/profile/email/request-code', [ProfileController::class, 'sendEmailCode'])->middleware('throttle:5,1');
+    Route::post('/profile/email/verify', [ProfileController::class, 'verifyEmail'])->middleware('throttle:10,1');
+    Route::put('/profile/preferences', [ProfileController::class, 'updatePreferences']);
+    Route::post('/profile/travelers', [ProfileController::class, 'addTraveler']);
+    Route::put('/profile/travelers/{traveler}', [ProfileController::class, 'updateTraveler']);
+    Route::delete('/profile/travelers/{traveler}', [ProfileController::class, 'deleteTraveler']);
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->middleware('throttle:5,1');
+    Route::get('/profile/sessions', [ProfileController::class, 'sessions']);
+    Route::delete('/profile/sessions/{token}', [ProfileController::class, 'revokeSession']);
+    Route::delete('/profile/account', [ProfileController::class, 'deleteAccount'])->middleware('throttle:5,1');
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::post('/bookings', [BookingController::class, 'store']);
