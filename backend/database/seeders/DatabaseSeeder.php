@@ -68,6 +68,8 @@ class DatabaseSeeder extends Seeder
                         'departure' => $flightDeparture,
                         'arrival' => $flightDeparture->copy()->addHour(),
                         'status' => 'scheduled',
+                        'base_fare' => 180.00 + ($routeNumber * 15),
+                        'currency' => 'USD',
                         'updated_at' => $now,
                     ]);
                 } else {
@@ -78,6 +80,8 @@ class DatabaseSeeder extends Seeder
                         'departure' => $flightDeparture,
                         'arrival' => $flightDeparture->copy()->addHour(),
                         'status' => 'scheduled',
+                        'base_fare' => 180.00 + ($routeNumber * 15),
+                        'currency' => 'USD',
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
@@ -93,13 +97,88 @@ class DatabaseSeeder extends Seeder
 
         // User::factory(10)->create();
 
-        User::firstOrCreate(
+        $demoUser = User::firstOrCreate(
             ['email' => 'test@example.com'],
             [
                 'name' => 'Test User',
                 'password' => bcrypt('password'),
             ]
         );
+
+        $passenger = DB::table('passengers')->where('user_id', $demoUser->id)->first();
+        if (! $passenger) {
+            $passengerId = DB::table('passengers')->insertGetId([
+                'user_id' => $demoUser->id,
+                'name' => $demoUser->name,
+                'email' => $demoUser->email,
+                'passport' => 'DEMO-' . $demoUser->id,
+                'frequent_flyer_points' => 0,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            $passenger = DB::table('passengers')->where('id', $passengerId)->first();
+        }
+
+        DB::table('saved_payment_methods')->updateOrInsert(
+            ['gateway_method_ref' => 'sandbox_pm_demo_visa_4242'],
+            [
+                'user_id' => $demoUser->id,
+                'gateway' => 'sandbox',
+                'gateway_customer_ref' => 'sandbox_customer_' . $demoUser->id,
+                'brand' => 'Visa',
+                'last_four' => '4242',
+                'expiry_month' => 12,
+                'expiry_year' => now()->year + 2,
+                'is_default' => true,
+                'status' => 'active',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        );
+
+        DB::table('saved_payment_methods')->where('user_id', $demoUser->id)
+            ->where('gateway_method_ref', '<>', 'sandbox_pm_demo_visa_4242')->update(['is_default' => false]);
+
+        $demoFlight = DB::table('flights')->where('origin', 'Dhaka')->where('destination', 'Chittagong')->first();
+        if ($demoFlight) {
+            $demoBooking = DB::table('bookings')->where('passenger_id', $passenger->id)
+                ->where('flight_id', $demoFlight->id)->first();
+
+            if (! $demoBooking) {
+                $demoSeat = DB::table('seats')->where('flight_id', $demoFlight->id)
+                    ->where('is_booked', false)->orderBy('id')->first();
+
+                if ($demoSeat) {
+                    $demoBookingId = DB::table('bookings')->insertGetId([
+                        'passenger_id' => $passenger->id,
+                        'flight_id' => $demoFlight->id,
+                        'seat_id' => $demoSeat->id,
+                        'timestamp' => $now,
+                        'status' => 'confirmed',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+                    DB::table('seats')->where('id', $demoSeat->id)->update(['is_booked' => true, 'updated_at' => $now]);
+
+                    $demoBooking = (object) ['id' => $demoBookingId];
+                }
+            }
+
+            if ($demoBooking && ! DB::table('payments')->where('booking_id', $demoBooking->id)->exists()) {
+                DB::table('payments')->insert([
+                    'booking_id' => $demoBooking->id,
+                    'amount' => $demoFlight->base_fare,
+                    'payment_date' => $now,
+                    'status' => 'completed',
+                    'gateway' => 'sandbox',
+                    'transaction_reference' => 'sbx_seed_txn_' . $demoBooking->id,
+                    'payment_method_id' => DB::table('saved_payment_methods')
+                        ->where('gateway_method_ref', 'sandbox_pm_demo_visa_4242')->value('id'),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+        }
     }
 
     /**
@@ -133,8 +212,8 @@ class DatabaseSeeder extends Seeder
                     'row_no' => $row,
                     'seat_letter' => $letter,
                     'surcharge' => match ($type) {
-                        'extra_legroom' => 1500,
-                        'exit' => 800,
+                        'extra_legroom' => 15,
+                        'exit' => 8,
                         default => 0,
                     },
                     'created_at' => $now,

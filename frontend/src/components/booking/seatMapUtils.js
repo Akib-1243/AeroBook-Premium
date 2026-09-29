@@ -21,7 +21,7 @@ export const SEAT_LEGEND = [
   { status: 'blocked', label: 'Blocked', hint: 'Not for sale' },
 ];
 
-export const SEAT_CURRENCY = 'BDT';
+export const SEAT_CURRENCY = 'USD';
 
 export const displayStatus = (seat, selectedIds) =>
   seat.status === 'available' && selectedIds.includes(seat.id) ? 'selected' : seat.status;

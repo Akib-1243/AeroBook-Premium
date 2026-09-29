@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { createBooking } from '../api/bookings';
 import useSeatAvailability from '../hooks/useSeatAvailability';
 import SeatMap, { SeatLegend } from '../components/booking/SeatMap';
+import CheckoutModal from '../components/booking/CheckoutModal';
 import {
   pruneSelection,
   seatPriceLabel,
@@ -23,13 +24,16 @@ function SeatSelectionPage() {
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [message, setMessage] = useState('');
-  const [submitting, setSubmitting] = useState(null); // 'book' | 'buy' while a request is in flight
+  const [checkoutMode, setCheckoutMode] = useState(null); // 'book' | 'buy' while the checkout modal is open
+  const [submitting, setSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
 
   // A live refresh may show that someone else took a seat this user had picked.
   useEffect(() => {
     const { selected, lost } = pruneSelection(selectedIds, seats);
     if (lost.length) {
       setSelectedIds(selected);
+      setCheckoutMode(null);
       setMessage(`Seat ${lost.join(', ')} was just taken. Please choose another seat.`);
     }
   }, [seats]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -40,23 +44,33 @@ function SeatSelectionPage() {
     setMessage(result.error);
   };
 
-  const handleSubmit = async (mode) => {
+  const openCheckout = (mode) => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
-    setSubmitting(mode);
     setMessage('');
+    setCheckoutError('');
+    setCheckoutMode(mode);
+  };
+
+  const handleConfirm = async ({ travelerId, paymentMethodId }) => {
+    setSubmitting(true);
+    setCheckoutError('');
     try {
-      const result = await createBooking(Number(flightId), selectedIds, mode);
+      const result = await createBooking(Number(flightId), {
+        seatIds: selectedIds,
+        mode: checkoutMode,
+        travelerId,
+        paymentMethodId,
+      });
       navigate('/my-bookings', { state: { notice: result.message } });
     } catch (err) {
-      setMessage(err.message || 'This seat was just taken. Please choose another seat.');
-      setSelectedIds([]);
+      // A taken seat shows up in the refresh below, and the effect above closes checkout.
+      setCheckoutError(err.message || 'Booking failed.');
       refresh();
     } finally {
-      setSubmitting(null);
+      setSubmitting(false);
     }
   };
 
@@ -121,20 +135,20 @@ function SeatSelectionPage() {
                   <button
                     type="button"
                     className="login-btn"
-                    disabled={selectedIds.length !== passengers || Boolean(submitting)}
-                    onClick={() => handleSubmit('book')}
+                    disabled={selectedIds.length !== passengers || Boolean(checkoutMode)}
+                    onClick={() => openCheckout('book')}
                     title="Reserve the seats now and pay later from My Bookings"
                   >
-                    {submitting === 'book' ? 'Booking…' : 'Book (pay later)'}
+                    Book (pay later)
                   </button>
                   <button
                     type="button"
                     className="search-btn"
-                    disabled={selectedIds.length !== passengers || Boolean(submitting)}
-                    onClick={() => handleSubmit('buy')}
+                    disabled={selectedIds.length !== passengers || Boolean(checkoutMode)}
+                    onClick={() => openCheckout('buy')}
                     title="Pay now and get your ticket immediately"
                   >
-                    {submitting === 'buy' ? 'Processing…' : 'Buy now'}
+                    Buy now
                   </button>
                 </div>
                 <p className="seat-summary__hint">
@@ -146,6 +160,18 @@ function SeatSelectionPage() {
           </div>
         )}
       </main>
+
+      {checkoutMode && (
+        <CheckoutModal
+          flight={flight}
+          seats={selectedSeats}
+          mode={checkoutMode}
+          submitting={submitting}
+          error={checkoutError}
+          onClose={() => setCheckoutMode(null)}
+          onConfirm={handleConfirm}
+        />
+      )}
 
       <SiteFooter />
     </div>

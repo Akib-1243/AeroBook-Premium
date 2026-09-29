@@ -27,6 +27,8 @@ class FlightController extends Controller
                 f.departure,
                 f.arrival,
                 f.status AS flight_status,
+                f.base_fare,
+                f.currency,
                 ac.model AS aircraft_model,
                 ac.capacity,
                 COUNT(s.id) AS total_seats,
@@ -45,6 +47,8 @@ class FlightController extends Controller
                 f.departure,
                 f.arrival,
                 f.status,
+                f.base_fare,
+                f.currency,
                 ac.model,
                 ac.capacity
             HAVING SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) >= :passengers
@@ -67,7 +71,7 @@ class FlightController extends Controller
     {
         $flight = DB::selectOne(
             'SELECT f.id, f.origin, f.destination, f.departure, f.arrival, f.status,
-                    ac.model AS aircraft_model
+                    f.base_fare, f.currency, ac.model AS aircraft_model
              FROM dbo.flights f
              INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
              WHERE f.id = :flight_id',

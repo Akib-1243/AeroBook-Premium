@@ -10,7 +10,7 @@ function RegisterPage() {
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { register, login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -25,7 +25,6 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      // First register the user
       await register({
         name,
         email,
@@ -34,8 +33,6 @@ function RegisterPage() {
         password_confirmation: passwordConfirmation,
       });
 
-      // Then login automatically
-      await login({ email, password });
       navigate('/home');
     } catch (err) {
       const errorMessage = err?.message || err?.errors?.email?.[0] || 'Registration failed. Please try again.';

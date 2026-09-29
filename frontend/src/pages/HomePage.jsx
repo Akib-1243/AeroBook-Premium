@@ -24,7 +24,7 @@ function HomePage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
 
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   const navigate = useNavigate();
 
@@ -324,6 +324,11 @@ function HomePage() {
                   <strong>{flight.available_seats} seats</strong>
                   <small>of {flight.total_seats} total</small>
                 </div>
+                <div className="flight-card-fare">
+                  <span className="flight-card-label">Sandbox fare</span>
+                  <strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: flight.currency || 'USD' }).format(Number(flight.base_fare || 0))}</strong>
+                  <small>per traveler</small>
+                </div>
               </div>
 
               <button
@@ -336,7 +341,6 @@ function HomePage() {
           ))}
         </section>
       )}
-
 
       {/* Features Section */}
       <section className="features-section">

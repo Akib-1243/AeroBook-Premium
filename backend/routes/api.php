@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AirportController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\BookingAccountController;
 use App\Http\Controllers\Api\FlightController;
 
 Route::get('/airports', [AirportController::class, 'index']);
@@ -33,7 +35,26 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile/details', [ProfileController::class, 'update']);
+    Route::post('/profile/email/request-code', [ProfileController::class, 'sendEmailCode'])->middleware('throttle:5,1');
+    Route::post('/profile/email/verify', [ProfileController::class, 'verifyEmail'])->middleware('throttle:10,1');
+    Route::put('/profile/preferences', [ProfileController::class, 'updatePreferences']);
+    Route::post('/profile/travelers', [ProfileController::class, 'addTraveler']);
+    Route::put('/profile/travelers/{traveler}', [ProfileController::class, 'updateTraveler']);
+    Route::delete('/profile/travelers/{traveler}', [ProfileController::class, 'deleteTraveler']);
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->middleware('throttle:5,1');
+    Route::get('/profile/sessions', [ProfileController::class, 'sessions']);
+    Route::delete('/profile/sessions/{token}', [ProfileController::class, 'revokeSession']);
+    Route::delete('/profile/account', [ProfileController::class, 'deleteAccount'])->middleware('throttle:5,1');
+    Route::get('/account/transactions', [BookingAccountController::class, 'transactions']);
+    Route::get('/account/payment-methods', [BookingAccountController::class, 'paymentMethods']);
+    Route::post('/account/payment-methods/tokenize', [BookingAccountController::class, 'tokenizePaymentMethod'])->middleware('throttle:10,1');
+    Route::put('/account/payment-methods/{method}/default', [BookingAccountController::class, 'setDefaultPaymentMethod']);
+    Route::delete('/account/payment-methods/{method}', [BookingAccountController::class, 'removePaymentMethod']);
+    Route::get('/account/refunds', [BookingAccountController::class, 'refunds']);
     Route::get('/bookings', [BookingController::class, 'index']);
+    Route::post('/bookings/{booking}/cancel', [BookingAccountController::class, 'cancelBooking'])->middleware('throttle:10,1');
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::post('/bookings/{booking}/pay', [BookingController::class, 'pay'])->whereNumber('booking');

@@ -120,8 +120,8 @@ test('seatAriaLabel reads number, status and position', () => {
 
 test('seatPriceLabel shows surcharge with currency or included', () => {
   assert.equal(seatPriceLabel(seat({ surcharge: 0 })), 'Included in your fare');
-  assert.equal(seatPriceLabel(seat({ surcharge: 1500 })), '+ BDT 1,500');
-  assert.equal(seatPriceLabel(seat({ surcharge: '800.00' })), '+ BDT 800');
+  assert.equal(seatPriceLabel(seat({ surcharge: 15 })), '+ USD 15');
+  assert.equal(seatPriceLabel(seat({ surcharge: '8.50' })), '+ USD 8.5');
 });
 
 test('selectionCounter reports progress', () => {
