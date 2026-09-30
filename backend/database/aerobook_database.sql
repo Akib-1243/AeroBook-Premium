@@ -240,6 +240,26 @@ BEGIN
 END
 GO
 
+-- seats: seat map colour legend columns (Improvement Plan 3.2).
+-- status: available (green) | booked (amber, held) | sold (grey) | blocked (dark grey)
+IF COL_LENGTH('dbo.seats', 'status') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[seats] ADD
+        [status]      NVARCHAR(20)   NOT NULL CONSTRAINT [DF_seats_status] DEFAULT 'available',
+        [seat_type]   NVARCHAR(20)   NOT NULL CONSTRAINT [DF_seats_seat_type] DEFAULT 'standard',
+        [position]    NVARCHAR(10)   NULL,
+        [row_no]      SMALLINT       NULL,
+        [seat_letter] NVARCHAR(2)    NULL,
+        [surcharge]   DECIMAL(10, 2) NOT NULL CONSTRAINT [DF_seats_surcharge] DEFAULT 0,
+        CONSTRAINT [CK_seats_status]    CHECK ([status] IN ('available', 'booked', 'sold', 'blocked')),
+        CONSTRAINT [CK_seats_seat_type] CHECK ([seat_type] IN ('standard', 'extra_legroom', 'exit'));
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_seats_flight_id_status')
+    CREATE NONCLUSTERED INDEX [IX_seats_flight_id_status] ON [dbo].[seats] ([flight_id], [status]);
+GO
+
 -- bookings
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'bookings')
 BEGIN
@@ -426,6 +446,19 @@ BEGIN
         (2, '14B', 'economy',    0, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()),
         (2, '15C', 'economy',    1, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET());
 END
+GO
+
+-- Fill the seat map columns from seat_number (e.g. '12A' -> row 12, letter A, window)
+UPDATE seats
+SET row_no      = CAST(LEFT(seat_number, LEN(seat_number) - 1) AS SMALLINT),
+    seat_letter = RIGHT(seat_number, 1),
+    position    = CASE RIGHT(seat_number, 1)
+                      WHEN 'A' THEN 'window' WHEN 'F' THEN 'window'
+                      WHEN 'C' THEN 'aisle'  WHEN 'D' THEN 'aisle'
+                      ELSE 'middle' END
+WHERE row_no IS NULL AND seat_number LIKE '%[0-9][A-Z]';
+
+UPDATE seats SET status = 'sold' WHERE is_booked = 1 AND status = 'available';
 GO
 
 -- =============================================================================

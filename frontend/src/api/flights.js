@@ -29,6 +29,16 @@ export const getAirports = async () => {
   return response.json();
 };
 
+export const getSeatMap = async (flightId) => {
+  const response = await fetch(`${API_BASE_URL}/flights/${flightId}/seatmap`);
+
+  if (!response.ok) {
+    throw new Error('Seat map could not be loaded');
+  }
+
+  return response.json();
+};
+
 export const searchFlights = async ({
   origin,
   destination,

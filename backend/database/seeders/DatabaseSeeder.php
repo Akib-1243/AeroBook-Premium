@@ -88,18 +88,7 @@ class DatabaseSeeder extends Seeder
                 }
 
                 if (!DB::table('seats')->where('flight_id', $flightId)->exists()) {
-                    $seats = [];
-                    foreach (range(1, 6) as $seatNumber) {
-                        $seats[] = [
-                            'flight_id' => $flightId,
-                            'seat_number' => $seatNumber . 'A',
-                            'seat_class' => $seatNumber <= 2 ? 'business' : 'economy',
-                            'is_booked' => false,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
-                    }
-                    DB::table('seats')->insert($seats);
+                    DB::table('seats')->insert($this->boeing737Layout($flightId, $now));
                 }
 
                 $routeNumber++;
@@ -190,5 +179,49 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    /**
+     * A 3-3 cabin (A B C | D E F), 20 rows: rows 1-2 business, row 3 extra legroom,
+     * rows 12-13 over-wing exits, and two seats blocked for crew rest.
+     */
+    private function boeing737Layout(int $flightId, Carbon $now): array
+    {
+        $seats = [];
+
+        foreach (range(1, 20) as $row) {
+            foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $letter) {
+                $type = match (true) {
+                    $row === 3 => 'extra_legroom',
+                    in_array($row, [12, 13], true) => 'exit',
+                    default => 'standard',
+                };
+
+                $seats[] = [
+                    'flight_id' => $flightId,
+                    'seat_number' => $row . $letter,
+                    'seat_class' => $row <= 2 ? 'business' : 'economy',
+                    'is_booked' => false,
+                    'status' => $row === 20 && in_array($letter, ['C', 'D'], true) ? 'blocked' : 'available',
+                    'seat_type' => $type,
+                    'position' => match ($letter) {
+                        'A', 'F' => 'window',
+                        'C', 'D' => 'aisle',
+                        default => 'middle',
+                    },
+                    'row_no' => $row,
+                    'seat_letter' => $letter,
+                    'surcharge' => match ($type) {
+                        'extra_legroom' => 15,
+                        'exit' => 8,
+                        default => 0,
+                    },
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        return $seats;
     }
 }

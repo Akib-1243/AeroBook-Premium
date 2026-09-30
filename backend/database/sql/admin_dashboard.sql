@@ -12,8 +12,8 @@ SELECT dashboard_json = (
          WHERE status IN ('scheduled', 'in_progress', 'pending')) AS maintenance_aircraft,
         JSON_QUERY((
             SELECT
-                CAST(SUM(CASE WHEN s.is_booked = 1 THEN 1 ELSE 0 END) AS INT) AS occupied,
-                CAST(SUM(CASE WHEN s.is_booked = 0 THEN 1 ELSE 0 END) AS INT) AS available,
+                CAST(SUM(CASE WHEN s.status IN ('booked', 'sold') THEN 1 ELSE 0 END) AS INT) AS occupied,
+                CAST(SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) AS INT) AS available,
                 COUNT(*) AS total_seats
             FROM dbo.seats s
             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER

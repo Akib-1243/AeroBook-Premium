@@ -1,4 +1,4 @@
-SELECT TOP 1 id
+SELECT TOP 1 id, surcharge
 FROM dbo.seats WITH (UPDLOCK, ROWLOCK)
-WHERE flight_id = :flight_id AND is_booked = 0
-ORDER BY id;
+WHERE flight_id = :flight_id AND status = 'available'
+ORDER BY row_no, seat_letter, id;

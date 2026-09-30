@@ -205,6 +205,10 @@ class BookingAccountController extends Controller
             if (in_array(strtolower($booking->status), ['cancelled', 'canceled'], true)) {
                 return ['error' => 'This booking is already cancelled.', 'status' => 409];
             }
+            // An expired hold already gave its seat back, and someone else may have bought it since.
+            if (strtolower($booking->status) === 'expired') {
+                return ['error' => 'This booking has expired and its seat has been released.', 'status' => 409];
+            }
             if (Carbon::parse($booking->departure)->isPast()) {
                 return ['error' => 'A departed flight cannot be cancelled online.', 'status' => 409];
             }
@@ -212,7 +216,7 @@ class BookingAccountController extends Controller
             $payment = DB::table('payments')->where('booking_id', $bookingId)->orderByDesc('id')->first();
             $now = Carbon::now();
             DB::table('bookings')->where('id', $bookingId)->update(['status' => 'cancelled', 'updated_at' => $now]);
-            DB::table('seats')->where('id', $booking->seat_id)->update(['is_booked' => false, 'updated_at' => $now]);
+            DB::table('seats')->where('id', $booking->seat_id)->update(['is_booked' => false, 'status' => 'available', 'updated_at' => $now]);
 
             $refundCreated = false;
             if ($payment && in_array(strtolower($payment->status), ['paid', 'completed', 'succeeded'], true)) {

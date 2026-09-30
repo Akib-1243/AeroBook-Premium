@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\FlightController;
 
 Route::get('/airports', [AirportController::class, 'index']);
 Route::get('/flights/search', [FlightController::class, 'search']);
+Route::get('/flights/{flight}/seatmap', [FlightController::class, 'seatmap'])->whereNumber('flight');
 
 Route::get('/', function () {
     return response()->json([
@@ -56,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/bookings/{booking}/cancel', [BookingAccountController::class, 'cancelBooking'])->middleware('throttle:10,1');
     Route::get('/bookings/{booking}', [BookingController::class, 'show']);
     Route::post('/bookings', [BookingController::class, 'store']);
+    Route::post('/bookings/{booking}/pay', [BookingController::class, 'pay'])->whereNumber('booking');
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function (): void {

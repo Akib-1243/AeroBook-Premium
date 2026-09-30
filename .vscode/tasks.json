@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Frontend: npm run dev",
+      "type": "shell",
+      "command": "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^x^" },
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "vite",
+          "endsPattern": "ready in"
+        }
+      }
+    },
+    {
+      "label": "Backend: docker compose up",
+      "type": "shell",
+      "command": "docker compose up -d && docker compose exec app php artisan migrate --force",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    }
+  ]
+}

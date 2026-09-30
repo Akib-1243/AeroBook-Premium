@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cancelBooking, getRefundRequests, getSavedPaymentMethods, getTransactions, removeSavedPaymentMethod, setDefaultPaymentMethod, tokenizeSandboxPaymentMethod } from '../api/bookingAccount';
-import { getMyBookings } from '../api/bookings';
+import { getMyBookings, payBooking } from '../api/bookings';
 import UserProfileMenu from '../components/UserProfileMenu';
 
 const sections = [
@@ -35,7 +35,7 @@ function StatusBadge({ status }) {
   const normalized = String(status || 'pending').toLowerCase().replaceAll('_', ' ');
   const tone = ['confirmed', 'paid', 'completed', 'succeeded', 'processed'].includes(normalized)
     ? 'good'
-    : ['cancelled', 'canceled', 'rejected', 'failed'].includes(normalized)
+    : ['cancelled', 'canceled', 'rejected', 'failed', 'expired'].includes(normalized)
       ? 'bad'
       : 'pending';
   return <span className={`account-status account-status-${tone}`}>{normalized}</span>;
@@ -44,6 +44,7 @@ function StatusBadge({ status }) {
 function MyBookingsPage() {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [bookingFilter, setBookingFilter] = useState('upcoming');
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -65,7 +66,8 @@ function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(location.state?.notice || '');
+  const [payMethodChoice, setPayMethodChoice] = useState({}); // booking id -> saved payment method id
   const [section, setSection] = useState('bookings');
 
   const refresh = useCallback(async () => {
@@ -91,7 +93,8 @@ function MyBookingsPage() {
 
   const bookingCategory = (booking) => {
     const status = String(booking.status || '').toLowerCase();
-    if (['cancelled', 'canceled'].includes(status)) return 'cancelled';
+    // An expired hold was never paid and its seat is back on sale, so it sits with the cancelled ones.
+    if (['cancelled', 'canceled', 'expired'].includes(status)) return 'cancelled';
     const departure = new Date(booking.flight?.departure || 0);
     if (status === 'completed' || (departure.getTime() && departure < new Date())) return 'past';
     return 'upcoming';
@@ -114,6 +117,30 @@ function MyBookingsPage() {
       setError(cancelError.message || 'This booking could not be cancelled.');
     } finally {
       setSaving(null);
+    }
+  };
+
+  const defaultPaymentMethodId = paymentMethods.find((method) => method.is_default)?.id || paymentMethods[0]?.id;
+
+  // Pay for a booking that was reserved with "Book (pay later)".
+  const handlePay = async (booking) => {
+    const methodId = payMethodChoice[booking.id] || defaultPaymentMethodId;
+    if (!methodId) {
+      setError('Add a sandbox payment method first, then pay for your held seat.');
+      setSection('payments');
+      return;
+    }
+    setSaving(`pay-${booking.id}`);
+    setError('');
+    setMessage('');
+    try {
+      const result = await payBooking(booking.id, Number(methodId));
+      setMessage(result.message || 'Payment received.');
+    } catch (payError) {
+      setError(payError.message || 'Payment could not be completed.');
+    } finally {
+      setSaving(null);
+      await refresh();
     }
   };
 
@@ -209,8 +236,17 @@ function MyBookingsPage() {
               <div><span>Booking reference</span><strong>#{booking.id}</strong></div>
               <div><span>Traveler</span><strong>{booking.traveler ? `${booking.traveler.first_name} ${booking.traveler.last_name}` : 'Primary traveler'}</strong></div>
               <div><span>Seat</span><strong>{booking.seat?.number || 'Pending'}{booking.seat?.class ? ` · ${booking.seat.class}` : ''}</strong></div>
-              <div><span>Amount</span><strong>{money(booking.payment?.amount)}</strong></div>
+              <div><span>Amount</span><strong>{booking.status === 'pending' && booking.payment?.amount == null ? 'Due at payment' : money(booking.payment?.amount)}</strong></div>
             </div>
+            {booking.status === 'pending' && <div className="booking-card-footer">
+              <span>Seat held until {formatDate(booking.hold_expires_at)}. Pay before then to get your ticket.</span>
+              <span>
+                {paymentMethods.length > 1 && <select aria-label={`Payment method for booking #${booking.id}`} value={payMethodChoice[booking.id] || defaultPaymentMethodId} onChange={(event) => setPayMethodChoice((current) => ({ ...current, [booking.id]: event.target.value }))}>
+                  {paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.brand} ···· {method.last_four}</option>)}
+                </select>}{' '}
+                <button type="button" className="search-btn" disabled={saving === `pay-${booking.id}`} onClick={() => handlePay(booking)}>{saving === `pay-${booking.id}` ? 'Processing…' : 'Pay now'}</button>
+              </span>
+            </div>}
             <div className="booking-card-footer"><span>Booked {formatDate(booking.timestamp)}</span>{isCancelable && <button type="button" className="account-danger-link" disabled={saving === `booking-${booking.id}`} onClick={() => handleCancel(booking)}>{saving === `booking-${booking.id}` ? 'Cancelling...' : 'Cancel booking'}</button>}</div>
           </article>;
         })}

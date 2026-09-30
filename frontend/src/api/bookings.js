@@ -9,13 +9,23 @@ export const getMyBookings = async () => {
   }
 };
 
-export const createBooking = async (flightId, travelerId = null, paymentMethodId = null) => {
+// mode 'book' holds the seats until paid; 'buy' charges the saved payment method now.
+// With no seatIds the server assigns the next available seat.
+export const createBooking = async (flightId, { seatIds = [], mode = 'book', travelerId = null, paymentMethodId = null } = {}) => {
   try {
-    const response = await axiosClient.post('/bookings', {
-      flight_id: flightId,
-      traveler_id: travelerId || null,
-      payment_method_id: paymentMethodId,
-    });
+    const payload = { flight_id: flightId, mode, traveler_id: travelerId || null };
+    if (seatIds.length) payload.seat_ids = seatIds;
+    if (paymentMethodId) payload.payment_method_id = paymentMethodId;
+    const response = await axiosClient.post('/bookings', payload);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const payBooking = async (bookingId, paymentMethodId) => {
+  try {
+    const response = await axiosClient.post(`/bookings/${bookingId}/pay`, { payment_method_id: paymentMethodId });
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
