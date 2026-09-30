@@ -71,16 +71,32 @@ function CheckoutModal({ flight, seats, mode, submitting, error, onClose, onConf
       setSavedPaymentMethods((current) => normalizePaymentMethods([method, ...current]));
       setSelectedPaymentMethodId(String(method.id));
       setSandboxCard(emptySandboxCard());
+      return method;
     } catch (err) {
       setLocalError(err.message || 'The sandbox card could not be tokenized.');
+      return null;
     } finally {
       setTokenizingCard(false);
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (needsPayment && !selectedPaymentMethodId) {
+      if (sandboxCard.payment_method_type === 'card'
+        && sandboxCard.cardholder_name
+        && sandboxCard.card_number
+        && sandboxCard.security_code) {
+        const method = await tokenizeSandboxCard();
+        if (!method) return;
+
+        onConfirm({
+          travelerId: selectedTravelerId || null,
+          paymentMethodId: Number(method.id),
+        });
+        return;
+      }
+
       setLocalError('Add or select a sandbox payment method to continue.');
       return;
     }
@@ -168,8 +184,8 @@ function CheckoutModal({ flight, seats, mode, submitting, error, onClose, onConf
             {shownError && <p className="booking-modal-error" role="alert">{shownError}</p>}
             <div className="booking-modal-actions">
               <button type="button" className="booking-modal-cancel" onClick={onClose} disabled={submitting}>Cancel</button>
-              <button type="submit" className="search-btn" disabled={submitting}>
-                {submitting ? (needsPayment ? 'Processing...' : 'Booking...') : (needsPayment ? 'Pay and confirm' : 'Hold seats')}
+              <button type="submit" className="search-btn" disabled={submitting || tokenizingCard}>
+                {tokenizingCard ? 'Tokenizing and paying...' : submitting ? (needsPayment ? 'Processing...' : 'Booking...') : (needsPayment ? 'Pay and confirm' : 'Hold seats')}
               </button>
             </div>
           </form>

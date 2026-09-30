@@ -56,7 +56,7 @@ class BookingAccountController extends Controller
         $data = $request->validate([
             'payment_method_type' => ['nullable', 'string', 'in:card,wallet,bank_transfer,cod,wallet_balance,split_payment'],
             'cardholder_name' => ['nullable', 'string', 'max:120'],
-            'card_number' => ['nullable', 'string', 'regex:/^[0-9 -]{13,23}$/'],
+            'card_number' => ['nullable', 'string', 'regex:/^[0-9 -]{12,23}$/'],
             'expiry_month' => ['nullable', 'integer', 'between:1,12'],
             'expiry_year' => ['nullable', 'integer', 'min:' . now()->year, 'max:' . (now()->year + 20)],
             'security_code' => ['nullable', 'string', 'regex:/^[0-9]{3,8}$/'],
@@ -71,7 +71,7 @@ class BookingAccountController extends Controller
         if ($methodType === 'card') {
             $request->validate([
                 'cardholder_name' => ['required', 'string', 'max:120'],
-                'card_number' => ['required', 'string', 'regex:/^[0-9 -]{13,23}$/'],
+                'card_number' => ['required', 'string', 'regex:/^[0-9 -]{12,23}$/'],
                 'expiry_month' => ['required', 'integer', 'between:1,12'],
                 'expiry_year' => ['required', 'integer', 'min:' . now()->year, 'max:' . (now()->year + 20)],
                 'security_code' => ['required', 'string', 'regex:/^[0-9]{3,8}$/'],
@@ -82,10 +82,9 @@ class BookingAccountController extends Controller
             }
 
             $digits = preg_replace('/\D+/', '', $data['card_number']);
-            $allowedCards = ['4242424242424242', '4000000000000002', '1111111111111111', '2222222222222222', '3333333333333333'];
-            if (! in_array($digits, $allowedCards, true) && ! preg_match('/^(?:4|5|2)/', $digits)) {
+            if (strlen($digits) < 12 || strlen($digits) > 19) {
                 return response()->json([
-                    'message' => 'Sandbox accepts mock card numbers only. Use a valid Visa/Mastercard test number or one of the published sandbox scenarios.',
+                    'message' => 'Enter a demo card number between 12 and 19 digits.',
                 ], 422);
             }
         }

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,9 +16,15 @@ return new class extends Migration
 
         Schema::table('payments', function (Blueprint $table): void {
             $table->string('gateway', 40)->default('sandbox');
-            $table->string('transaction_reference', 180)->nullable()->unique();
+            $table->string('transaction_reference', 180)->nullable();
             $table->unsignedBigInteger('payment_method_id')->nullable()->index();
         });
+
+        DB::statement(
+            'CREATE UNIQUE INDEX payments_transaction_reference_unique '
+            . 'ON payments (transaction_reference) '
+            . 'WHERE transaction_reference IS NOT NULL'
+        );
     }
 
     public function down(): void

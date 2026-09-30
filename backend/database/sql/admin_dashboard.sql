@@ -42,6 +42,27 @@ SELECT dashboard_json = (
             INNER JOIN dbo.flights f ON f.id = b.flight_id
             ORDER BY b.timestamp DESC
             FOR JSON PATH
-        )) AS recent_bookings
+        )) AS recent_bookings,
+        JSON_QUERY((
+            SELECT TOP 10
+                p.id AS id,
+                b.id AS booking_id,
+                pas.name AS passenger,
+                pas.email AS email,
+                CONCAT(f.origin, ' - ', f.destination) AS flight,
+                p.amount AS amount,
+                f.currency AS currency,
+                p.gateway AS gateway,
+                p.transaction_reference AS reference,
+                p.status AS status,
+                p.payment_date AS payment_date
+            FROM dbo.payments p
+            INNER JOIN dbo.bookings b ON b.id = p.booking_id
+            INNER JOIN dbo.passengers pas ON pas.id = b.passenger_id
+            INNER JOIN dbo.flights f ON f.id = b.flight_id
+            WHERE p.status IN ('paid', 'completed')
+            ORDER BY p.payment_date DESC, p.id DESC
+            FOR JSON PATH
+        )) AS recent_revenue
     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 );

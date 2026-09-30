@@ -87,8 +87,20 @@ class DatabaseSeeder extends Seeder
                     ]);
                 }
 
-                if (!DB::table('seats')->where('flight_id', $flightId)->exists()) {
-                    DB::table('seats')->insert($this->boeing737Layout($flightId, $now));
+                $existingSeatNumbers = array_fill_keys(
+                    array_map(
+                        'strtoupper',
+                        DB::table('seats')->where('flight_id', $flightId)->pluck('seat_number')->all()
+                    ),
+                    true
+                );
+                $missingSeats = array_values(array_filter(
+                    $this->boeing737Layout($flightId, $now),
+                    fn (array $seat): bool => ! isset($existingSeatNumbers[strtoupper($seat['seat_number'])])
+                ));
+
+                if ($missingSeats !== []) {
+                    DB::table('seats')->insert($missingSeats);
                 }
 
                 $routeNumber++;

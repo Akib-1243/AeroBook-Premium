@@ -27,6 +27,7 @@ function AdminDashboardPage() {
 
   const occupancy = dashboard.occupancy || { occupied: 0, available: 0 };
   const revenueData = dashboard.revenue || [];
+  const recentRevenue = dashboard.recent_revenue || [];
   const recentBookings = dashboard.recent_bookings || [];
 
   return (
@@ -77,6 +78,58 @@ function AdminDashboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="table-card">
+          <div className="admin-revenue-heading">
+            <div>
+              <h3 className="chart-title">Revenue Details</h3>
+              <p className="admin-revenue-subtitle">Latest completed payments and passenger records</p>
+            </div>
+            <span className="admin-revenue-count">{recentRevenue.length} transactions</span>
+          </div>
+          <div className="admin-revenue-table-wrap">
+            <table className="admin-table admin-revenue-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Passenger</th>
+                  <th>Flight</th>
+                  <th>Amount</th>
+                  <th>Gateway</th>
+                  <th>Booking</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentRevenue.length ? recentRevenue.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>{new Date(payment.payment_date).toLocaleString()}</td>
+                    <td>
+                      <div className="admin-revenue-passenger">
+                        <strong>{payment.passenger}</strong>
+                        <small className="admin-revenue-email">{payment.email}</small>
+                      </div>
+                    </td>
+                    <td>{payment.flight}</td>
+                    <td className="admin-revenue-amount">
+                      {new Intl.NumberFormat(undefined, {
+                        style: 'currency',
+                        currency: payment.currency || 'USD',
+                      }).format(Number(payment.amount || 0))}
+                    </td>
+                    <td>{payment.gateway || '—'}</td>
+                    <td>BK-{payment.booking_id}</td>
+                    <td>
+                      <span className="status-badge status-confirmed">{payment.status}</span>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan="7">No completed payments yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
