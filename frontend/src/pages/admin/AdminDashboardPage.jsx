@@ -33,7 +33,7 @@ function AdminDashboardPage() {
   return (
     <div className="admin-dashboard">
       <nav className="admin-navbar">
-        <h1>✈️ AeroBook Admin</h1>
+        <h1>AeroBook Admin</h1>
         <div className="admin-navbar-actions">
           <button onClick={() => navigate('/home')}>Exit Admin</button>
         </div>
@@ -43,10 +43,10 @@ function AdminDashboardPage() {
         <h2>Dashboard Overview</h2>
 
         <div className="kpi-row">
-          <KpiCard title="Total Flights" value={dashboard.total_flights} change="From live database" color="linear-gradient(135deg,#f97316,#f43f5e)" />
-          <KpiCard title="Active Bookings" value={dashboard.active_bookings} change="Confirmed or pending" color="linear-gradient(135deg,#3b82f6,#2563eb)" />
-          <KpiCard title="Revenue (This Month)" value={`$${Number(dashboard.monthly_revenue).toLocaleString()}`} change="Paid transactions" color="linear-gradient(135deg,#10b981,#059669)" />
-          <KpiCard title="Fleet Aircraft" value={dashboard.fleet_aircraft} change={`${dashboard.maintenance_aircraft || 0} in maintenance`} color="linear-gradient(135deg,#7c3aed,#4c1d95)" />
+          <KpiCard title="Total Flights" value={dashboard.total_flights} change="From live database" tone="blue" />
+          <KpiCard title="Active Bookings" value={dashboard.active_bookings} change="Confirmed or pending" tone="green" />
+          <KpiCard title="Revenue (This Month)" value={`$${Number(dashboard.monthly_revenue).toLocaleString()}`} change="Paid transactions" tone="amber" />
+          <KpiCard title="Fleet Aircraft" value={dashboard.fleet_aircraft} change={`${dashboard.maintenance_aircraft || 0} in maintenance`} tone="slate" />
         </div>
 
         <div className="chart-row">
@@ -56,30 +56,32 @@ function AdminDashboardPage() {
 
         <div className="table-card">
           <h3 className="chart-title">Recent Bookings</h3>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Booking ID</th>
-                <th>Passenger</th>
-                <th>Flight</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentBookings.map((b) => (
-                <tr key={b.id}>
-                  <td>BK-{b.id}</td>
-                  <td>{b.passenger}</td>
-                  <td>{b.flight}</td>
-                  <td>
-                    <span className={`status-badge ${b.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}`}>
-                      {b.status}
-                    </span>
-                  </td>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Passenger</th>
+                  <th>Flight</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentBookings.map((b) => (
+                  <tr key={b.id}>
+                    <td>BK-{b.id}</td>
+                    <td>{b.passenger}</td>
+                    <td>{b.flight}</td>
+                    <td>
+                      <span className={`status-badge ${b.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}`}>
+                        {b.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="table-card">

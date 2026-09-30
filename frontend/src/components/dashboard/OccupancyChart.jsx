@@ -11,13 +11,13 @@ function OccupancyChart({ occupied, empty }) {
       <h3 className="chart-title">Seat Occupancy</h3>
       <div className="donut-wrap">
         <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="18" />
+          <circle className="occupancy-track" cx="80" cy="80" r={radius} fill="none" strokeWidth="18" />
           <circle
+            className="occupancy-value"
             cx="80"
             cy="80"
             r={radius}
             fill="none"
-            stroke="#7c3aed"
             strokeWidth="18"
             strokeDasharray={`${occupiedLength} ${circumference}`}
             strokeLinecap="round"
@@ -28,8 +28,8 @@ function OccupancyChart({ occupied, empty }) {
           </text>
         </svg>
         <div className="donut-legend">
-          <div><span className="dot" style={{ background: '#7c3aed' }} /> Occupied ({occupied})</div>
-          <div><span className="dot" style={{ background: '#e5e7eb' }} /> Empty ({empty})</div>
+          <div><span className="dot dot-occupied" /> Occupied ({occupied})</div>
+          <div><span className="dot dot-empty" /> Empty ({empty})</div>
         </div>
       </div>
     </div>

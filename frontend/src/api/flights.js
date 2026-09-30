@@ -6,6 +6,7 @@ export const buildFlightSearchParams = ({
   date,
   time,
   passengers,
+  filters = {},
 }) => {
   const safePassengers = Number(passengers) > 0 ? Number(passengers) : 1;
   const params = new URLSearchParams();
@@ -15,6 +16,18 @@ export const buildFlightSearchParams = ({
   if (date) params.set('date', date);
   if (time) params.set('time', time);
   params.set('passengers', String(safePassengers));
+
+  if (filters.stops && filters.stops !== 'all') params.set('stops', filters.stops);
+  if (filters.minPrice !== undefined && filters.minPrice !== null) {
+    params.set('min_price', String(filters.minPrice));
+  }
+  if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
+    params.set('max_price', String(filters.maxPrice));
+  }
+  if (filters.sort) params.set('sort', filters.sort);
+  filters.airlines?.forEach((airline) => params.append('airlines[]', airline));
+  filters.departurePeriods?.forEach((period) => params.append('departure_periods[]', period));
+  filters.arrivalPeriods?.forEach((period) => params.append('arrival_periods[]', period));
 
   return params;
 };
@@ -45,6 +58,7 @@ export const searchFlights = async ({
   date,
   time,
   passengers,
+  filters,
 }) => {
   const params = buildFlightSearchParams({
     origin,
@@ -52,6 +66,7 @@ export const searchFlights = async ({
     date,
     time,
     passengers,
+    filters,
   });
 
   const response = await fetch(

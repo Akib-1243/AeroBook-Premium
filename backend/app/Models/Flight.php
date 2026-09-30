@@ -15,6 +15,7 @@ class Flight extends Model
         'aircraft_id',
         'origin',
         'destination',
+        'airline',
         'departure',
         'arrival',
         'status',

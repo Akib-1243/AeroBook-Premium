@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(AdminSeeder::class);
+
         DB::table('airports')->upsert([
             ['code' => 'DAC', 'city' => 'Dhaka', 'country' => 'Bangladesh'],
             ['code' => 'CGP', 'city' => 'Chittagong', 'country' => 'Bangladesh'],
@@ -64,6 +66,7 @@ class DatabaseSeeder extends Seeder
         ], ['airline_company_id', 'model'], ['capacity', 'total_flight_hours', 'maintenance_threshold', 'updated_at']);
 
         $cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
+        $airlines = ['Air Astra Bangladesh', 'Novoair', 'US-Bangla Airlines'];
         $aircraftIds = DB::table('aircraft')->pluck('id', 'model');
         $departure = Carbon::now('Asia/Dhaka')->addDay()->setTime(8, 0);
         $routeNumber = 0;
@@ -85,6 +88,7 @@ class DatabaseSeeder extends Seeder
                     DB::table('flights')->where('id', $flightId)->update([
                         'airline_company_id' => $partnerCompanyId,
                         'aircraft_id' => $aircraftIds['Boeing 737-800'],
+                        'airline' => $airlines[$routeNumber % count($airlines)],
                         'departure' => $flightDeparture,
                         'arrival' => $flightDeparture->copy()->addHour(),
                         'status' => 'scheduled',
@@ -96,6 +100,7 @@ class DatabaseSeeder extends Seeder
                     $flightId = DB::table('flights')->insertGetId([
                         'airline_company_id' => $partnerCompanyId,
                         'aircraft_id' => $aircraftIds['Boeing 737-800'],
+                        'airline' => $airlines[$routeNumber % count($airlines)],
                         'origin' => $origin,
                         'destination' => $destination,
                         'departure' => $flightDeparture,

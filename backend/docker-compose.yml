@@ -8,6 +8,14 @@ services:
     container_name: aerobook_app
     working_dir: /var/www
     environment:
+      DB_CONNECTION: sqlsrv
+      DB_HOST: sqlserver
+      DB_PORT: "1433"
+      DB_DATABASE: aerobook
+      DB_USERNAME: sa
+      DB_PASSWORD: "AeroBook_SqlServer_2026!"
+      DB_ENCRYPT: "yes"
+      DB_TRUST_SERVER_CERTIFICATE: "true"
       MAIL_MAILER: smtp
       MAIL_HOST: mailpit
       MAIL_PORT: "1025"

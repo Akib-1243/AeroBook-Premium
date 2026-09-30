@@ -49,9 +49,6 @@ function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 text-2xl font-bold mb-4">
-            ★
-          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">AeroBook Admin</h1>
           <p className="text-gray-600">Secure administrator access</p>
         </div>

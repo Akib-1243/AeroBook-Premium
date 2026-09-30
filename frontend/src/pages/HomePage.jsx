@@ -5,6 +5,23 @@ import { getAirports, searchFlights } from '../api/flights';
 import SiteFooter from '../components/SiteFooter';
 import UserProfileMenu from '../components/UserProfileMenu';
 
+const DEFAULT_FILTERS = {
+  stops: 'all',
+  airlines: [],
+  minPrice: null,
+  maxPrice: null,
+  departurePeriods: [],
+  arrivalPeriods: [],
+  sort: 'departure_asc',
+};
+
+const TIME_PERIODS = [
+  { value: 'early_morning', label: 'Early morning', hours: '00:00-04:59' },
+  { value: 'morning', label: 'Morning', hours: '05:00-11:59' },
+  { value: 'afternoon', label: 'Afternoon', hours: '12:00-17:59' },
+  { value: 'evening', label: 'Evening', hours: '18:00-23:59' },
+];
+
 function HomePage() {
   const defaultDate = new Date();
   defaultDate.setDate(defaultDate.getDate() + 1);
@@ -19,8 +36,13 @@ function HomePage() {
   const [date, setDate] = useState(defaultDateValue);
   const [passengers, setPassengers] = useState(1);
   const [flights, setFlights] = useState([]);
+  const [flightPool, setFlightPool] = useState([]);
+  const [airlineOptions, setAirlineOptions] = useState([]);
+  const [searchCriteria, setSearchCriteria] = useState(null);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [airports, setAirports] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
 
@@ -57,14 +79,63 @@ function HomePage() {
         passengers,
       });
 
-      setFlights(result.data);
+      const results = result.data || [];
+      setSearchCriteria({ origin, destination, date, passengers });
+      setFlightPool(results);
+      setFlights(results);
+      setAirlineOptions(result.meta?.airlines || []);
+      setFilters({ ...DEFAULT_FILTERS });
     } catch (error) {
       setFlights([]);
+      setFlightPool([]);
+      setAirlineOptions([]);
       setSearchError(error.message || 'Flight search failed.');
     } finally {
       setIsSearching(false);
     }
   };
+
+  const handleApplyFilters = async (nextFilters = filters) => {
+    if (!searchCriteria) return;
+
+    setFilters(nextFilters);
+    setIsFiltering(true);
+    setSearchError('');
+
+    try {
+      const result = await searchFlights({ ...searchCriteria, filters: nextFilters });
+      setFlights(result.data || []);
+      setAirlineOptions(result.meta?.airlines || []);
+    } catch (error) {
+      setSearchError(error.message || 'Unable to apply flight filters.');
+    } finally {
+      setIsFiltering(false);
+    }
+  };
+
+  const toggleFilterValue = (key, value) => {
+    const currentValues = filters[key];
+    const nextValues = currentValues.includes(value)
+      ? currentValues.filter((item) => item !== value)
+      : [...currentValues, value];
+    setFilters({ ...filters, [key]: nextValues });
+  };
+
+  const handleResetFilters = () => {
+    handleApplyFilters({ ...DEFAULT_FILTERS });
+  };
+
+  const fareValues = flightPool.map((flight) => Number(flight.base_fare)).filter(Number.isFinite);
+  const minimumFare = fareValues.length ? Math.floor(Math.min(...fareValues)) : 0;
+  const maximumFare = fareValues.length ? Math.ceil(Math.max(...fareValues)) : 1000;
+  const selectedMinimumFare = Math.max(minimumFare, Number(filters.minPrice ?? minimumFare));
+  const selectedMaximumFare = Math.max(selectedMinimumFare, Math.min(maximumFare, Number(filters.maxPrice ?? maximumFare)));
+  const currency = flightPool[0]?.currency || 'USD';
+  const formatFare = (value) => new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value);
 
   return (
     <div className="home-page">
@@ -286,59 +357,193 @@ function HomePage() {
       {/* Search Results */}
       {hasSearched && (
         <section className="flight-results">
-          <h2>{flights.length > 0 ? 'Available Flights' : 'No Flights Found'}</h2>
-
-          {searchError && <p>{searchError}</p>}
-
-          {!searchError && flights.length === 0 && (
-            <p>No scheduled flights match this route and time.</p>
-          )}
-
-          {flights.map((flight) => (
-            <div
-              className="flight-result-card"
-              key={flight.flight_id}
-            >
-              <div className="flight-card-header">
-                <div>
-                  <span className="flight-card-label">AeroBook flight</span>
-                  <h3>{flight.origin} <span>to</span> {flight.destination}</h3>
-                </div>
-                <span className="flight-status">{flight.flight_status}</span>
-              </div>
-
-              <div className="flight-card-details">
-                <div>
-                  <span className="flight-card-label">Departure</span>
-                  <strong>{new Date(flight.departure).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
-                  <small>{new Date(flight.departure).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small>
-                </div>
-                <div className="flight-card-line">&#8594;</div>
-                <div>
-                  <span className="flight-card-label">Arrival</span>
-                  <strong>{new Date(flight.arrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
-                  <small>{flight.aircraft_model}</small>
-                </div>
-                <div className="flight-card-seats">
-                  <span className="flight-card-label">Availability</span>
-                  <strong>{flight.available_seats} seats</strong>
-                  <small>of {flight.total_seats} total</small>
-                </div>
-                <div className="flight-card-fare">
-                  <span className="flight-card-label">Sandbox fare</span>
-                  <strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: flight.currency || 'USD' }).format(Number(flight.base_fare || 0))}</strong>
-                  <small>per traveler</small>
-                </div>
-              </div>
-
+          <div className="flight-results-heading">
+            <div>
+              <p className="flight-results-eyebrow">SEARCH RESULTS</p>
+              <h2>Available flights</h2>
+              <p className="flight-results-count" aria-live="polite">
+                {isFiltering ? 'Updating results...' : `${flights.length} flight${flights.length === 1 ? '' : 's'}`}
+              </p>
+            </div>
+            <div className="flight-sort-control" role="group" aria-label="Sort fares">
+              <span>Sort by fare</span>
               <button
-                className="search-btn"
-                onClick={() => handleBook(flight.flight_id)}
+                type="button"
+                className={filters.sort === 'price_asc' ? 'is-active' : ''}
+                onClick={() => handleApplyFilters({ ...filters, sort: 'price_asc' })}
+                disabled={isFiltering || !flightPool.length}
               >
-                Choose Seats
+                Lowest first
+              </button>
+              <button
+                type="button"
+                className={filters.sort === 'price_desc' ? 'is-active' : ''}
+                onClick={() => handleApplyFilters({ ...filters, sort: 'price_desc' })}
+                disabled={isFiltering || !flightPool.length}
+              >
+                Highest first
               </button>
             </div>
-          ))}
+          </div>
+
+          {searchError && <p className="flight-search-error" role="alert">{searchError}</p>}
+
+          {!searchError && (
+            <div className="flight-results-layout">
+              <aside className="flight-filter-panel" aria-label="Flight filters">
+                  <div className="flight-filter-heading">
+                    <h3>Filters</h3>
+                    <button type="button" onClick={handleResetFilters} disabled={isFiltering}>
+                      Reset
+                    </button>
+                  </div>
+
+                  <fieldset className="flight-filter-group" disabled={isFiltering}>
+                    <legend>Stops</legend>
+                    <label className="flight-filter-option">
+                      <input type="radio" name="flight-stops" checked={filters.stops === 'all'} onChange={() => setFilters({ ...filters, stops: 'all' })} />
+                      <span>Any</span>
+                    </label>
+                    <label className="flight-filter-option">
+                      <input type="radio" name="flight-stops" checked={filters.stops === '0'} onChange={() => setFilters({ ...filters, stops: '0' })} />
+                      <span>Non-stop</span>
+                    </label>
+                    <p className="flight-filter-note">Connecting itineraries are not available yet.</p>
+                    <label className="flight-filter-option is-unavailable">
+                      <input type="radio" name="flight-stops" disabled />
+                      <span>1 stop</span>
+                    </label>
+                    <label className="flight-filter-option is-unavailable">
+                      <input type="radio" name="flight-stops" disabled />
+                      <span>2+ stops</span>
+                    </label>
+                  </fieldset>
+
+                  <fieldset className="flight-filter-group" disabled={isFiltering}>
+                    <legend>Airlines</legend>
+                    {airlineOptions.map((airline) => (
+                      <label className="flight-filter-option flight-airline-option" key={airline.name}>
+                        <input
+                          type="checkbox"
+                          checked={filters.airlines.includes(airline.name)}
+                          onChange={() => toggleFilterValue('airlines', airline.name)}
+                        />
+                        <span className="flight-airline-name">{airline.name}</span>
+                        <span className="flight-airline-count">{airline.count}</span>
+                      </label>
+                    ))}
+                    {!airlineOptions.length && <p className="flight-filter-note">No airlines in the database.</p>}
+                  </fieldset>
+
+                  <fieldset className="flight-filter-group fare-filter-group" disabled={isFiltering || !fareValues.length}>
+                    <legend>Price range</legend>
+                    <div className="fare-range-values">
+                      <span>{formatFare(selectedMinimumFare)}</span>
+                      <span>{formatFare(selectedMaximumFare)}</span>
+                    </div>
+                    <label className="fare-range-control">
+                      <span>Minimum fare</span>
+                      <input
+                        type="range"
+                        min={minimumFare}
+                        max={maximumFare}
+                        step="1"
+                        value={selectedMinimumFare}
+                        aria-label="Minimum fare"
+                        onChange={(event) => setFilters({
+                          ...filters,
+                          minPrice: Math.min(Number(event.target.value), selectedMaximumFare),
+                        })}
+                      />
+                    </label>
+                    <label className="fare-range-control">
+                      <span>Maximum fare</span>
+                      <input
+                        type="range"
+                        min={minimumFare}
+                        max={maximumFare}
+                        step="1"
+                        value={selectedMaximumFare}
+                        aria-label="Maximum fare"
+                        onChange={(event) => setFilters({
+                          ...filters,
+                          maxPrice: Math.max(Number(event.target.value), selectedMinimumFare),
+                        })}
+                      />
+                    </label>
+                  </fieldset>
+
+                  {[['departurePeriods', 'Departure time'], ['arrivalPeriods', 'Arrival time']].map(([key, title]) => (
+                    <fieldset className="flight-filter-group" key={key} disabled={isFiltering}>
+                      <legend>{title}</legend>
+                      {TIME_PERIODS.map((period) => (
+                        <label className="flight-time-option" key={period.value}>
+                          <input
+                            type="checkbox"
+                            checked={filters[key].includes(period.value)}
+                            onChange={() => toggleFilterValue(key, period.value)}
+                          />
+                          <span className="flight-time-copy">
+                            <strong>{period.label}</strong>
+                            <small>{period.hours}</small>
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  ))}
+
+                  <button className="flight-filter-apply" type="button" onClick={() => handleApplyFilters()} disabled={isFiltering}>
+                    {isFiltering ? 'Applying...' : 'Apply filters'}
+                  </button>
+              </aside>
+
+              <div className="flight-results-list" aria-busy={isFiltering}>
+                {flights.length === 0 ? (
+                  <div className="flight-empty-state">
+                    <h3>{flightPool.length ? 'No flights match these filters' : 'No flights found'}</h3>
+                    <p>{flightPool.length ? 'Adjust your filters and try again.' : 'No scheduled flights match this route and date.'}</p>
+                  </div>
+                ) : flights.map((flight) => (
+                  <article className="flight-result-card" key={flight.flight_id}>
+                    <div className="flight-card-header">
+                      <div>
+                        <span className="flight-card-label">{flight.airline || 'AeroBook Air'}</span>
+                        <h3>{flight.origin} <span>to</span> {flight.destination}</h3>
+                      </div>
+                      <span className="flight-status">Non-stop</span>
+                    </div>
+
+                    <div className="flight-card-details">
+                      <div>
+                        <span className="flight-card-label">Departure</span>
+                        <strong>{new Date(flight.departure).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                        <small>{new Date(flight.departure).toLocaleDateString([], { month: 'short', day: 'numeric' })}</small>
+                      </div>
+                      <div className="flight-card-line" aria-hidden="true">&#8594;</div>
+                      <div>
+                        <span className="flight-card-label">Arrival</span>
+                        <strong>{new Date(flight.arrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                        <small>{flight.aircraft_model}</small>
+                      </div>
+                      <div className="flight-card-seats">
+                        <span className="flight-card-label">Availability</span>
+                        <strong>{flight.available_seats} seats</strong>
+                        <small>of {flight.total_seats} total</small>
+                      </div>
+                      <div className="flight-card-fare">
+                        <span className="flight-card-label">Fare per traveler</span>
+                        <strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: flight.currency || 'USD' }).format(Number(flight.base_fare || 0))}</strong>
+                      </div>
+                    </div>
+
+                    <button className="search-btn" onClick={() => handleBook(flight.flight_id)}>
+                      Choose Seats
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       )}
 
