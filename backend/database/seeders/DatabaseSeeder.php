@@ -29,6 +29,20 @@ class DatabaseSeeder extends Seeder
         ], ['code'], ['city', 'country']);
 
         $now = Carbon::now();
+        $demoAirlines = [
+            ['name' => 'Air Astra Bangladesh', 'code' => 'AIR-ASTRA'],
+            ['name' => 'Novoair', 'code' => 'NOVAIR'],
+            ['name' => 'US-Bangla Airlines', 'code' => 'US-BANGLA'],
+        ];
+        DB::table('airline_companies')->upsert(
+            array_map(fn (array $airline) => [...$airline, 'created_at' => $now, 'updated_at' => $now], $demoAirlines),
+            ['code'],
+            ['name', 'updated_at']
+        );
+        $airlineCompanyIds = DB::table('airline_companies')
+            ->whereIn('code', array_column($demoAirlines, 'code'))
+            ->pluck('id', 'code');
+
         DB::table('airline_companies')->updateOrInsert(
             ['code' => 'PARTNER-AIR'],
             ['name' => 'Partner Air', 'updated_at' => $now, 'created_at' => $now]
@@ -44,30 +58,36 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        DB::table('aircraft')->upsert([
-            [
+        $aircraftRows = [];
+        foreach ($airlineCompanyIds->values()->push($partnerCompanyId) as $companyId) {
+            $aircraftRows[] = [
                 'model' => 'Boeing 737-800',
-                'airline_company_id' => $partnerCompanyId,
+                'airline_company_id' => $companyId,
                 'capacity' => 180,
                 'total_flight_hours' => 42500.5,
                 'maintenance_threshold' => 50000,
                 'created_at' => $now,
                 'updated_at' => $now,
-            ],
-            [
+            ];
+            $aircraftRows[] = [
                 'model' => 'Airbus A320neo',
-                'airline_company_id' => $partnerCompanyId,
+                'airline_company_id' => $companyId,
                 'capacity' => 150,
                 'total_flight_hours' => 31200.0,
                 'maintenance_threshold' => 45000,
                 'created_at' => $now,
                 'updated_at' => $now,
-            ],
-        ], ['airline_company_id', 'model'], ['capacity', 'total_flight_hours', 'maintenance_threshold', 'updated_at']);
+            ];
+        }
+        DB::table('aircraft')->upsert(
+            $aircraftRows,
+            ['airline_company_id', 'model'],
+            ['capacity', 'total_flight_hours', 'maintenance_threshold', 'updated_at']
+        );
 
         $cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
-        $airlines = ['Air Astra Bangladesh', 'Novoair', 'US-Bangla Airlines'];
-        $aircraftIds = DB::table('aircraft')->pluck('id', 'model');
+        $aircraftIds = DB::table('aircraft')->get(['id', 'model', 'airline_company_id'])
+            ->keyBy(fn ($aircraft) => $aircraft->airline_company_id . '|' . $aircraft->model);
         $departure = Carbon::now('Asia/Dhaka')->addDay()->setTime(8, 0);
         $routeNumber = 0;
 
@@ -78,6 +98,9 @@ class DatabaseSeeder extends Seeder
                 }
 
                 $flightDeparture = $departure->copy()->addMinutes($routeNumber * 30);
+                $airline = $demoAirlines[$routeNumber % count($demoAirlines)];
+                $companyId = (int) $airlineCompanyIds[$airline['code']];
+                $aircraftId = $aircraftIds[$companyId . '|Boeing 737-800']->id;
                 $flight = DB::table('flights')->where([
                     'origin' => $origin,
                     'destination' => $destination,
@@ -86,9 +109,9 @@ class DatabaseSeeder extends Seeder
                 if ($flight) {
                     $flightId = $flight->id;
                     DB::table('flights')->where('id', $flightId)->update([
-                        'airline_company_id' => $partnerCompanyId,
-                        'aircraft_id' => $aircraftIds['Boeing 737-800'],
-                        'airline' => $airlines[$routeNumber % count($airlines)],
+                        'airline_company_id' => $companyId,
+                        'aircraft_id' => $aircraftId,
+                        'airline' => $airline['name'],
                         'departure' => $flightDeparture,
                         'arrival' => $flightDeparture->copy()->addHour(),
                         'status' => 'scheduled',
@@ -98,9 +121,9 @@ class DatabaseSeeder extends Seeder
                     ]);
                 } else {
                     $flightId = DB::table('flights')->insertGetId([
-                        'airline_company_id' => $partnerCompanyId,
-                        'aircraft_id' => $aircraftIds['Boeing 737-800'],
-                        'airline' => $airlines[$routeNumber % count($airlines)],
+                        'airline_company_id' => $companyId,
+                        'aircraft_id' => $aircraftId,
+                        'airline' => $airline['name'],
                         'origin' => $origin,
                         'destination' => $destination,
                         'departure' => $flightDeparture,

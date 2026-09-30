@@ -38,16 +38,15 @@ class FlightController extends Controller
             ], 422);
         }
 
-        $airlineOptions = DB::table('flights')
-            ->select('airline')
-            ->selectRaw('COUNT(*) AS flight_count')
-            ->whereNotNull('airline')
-            ->where('airline', '<>', '')
-            ->groupBy('airline')
-            ->orderBy('airline')
+        $airlineOptions = DB::table('airline_companies')
+            ->leftJoin('flights', 'flights.airline_company_id', '=', 'airline_companies.id')
+            ->select('airline_companies.name')
+            ->selectRaw('COUNT(flights.id) AS flight_count')
+            ->groupBy('airline_companies.id', 'airline_companies.name')
+            ->orderBy('airline_companies.name')
             ->get()
             ->map(fn ($airline) => [
-                'name' => $airline->airline,
+                'name' => $airline->name,
                 'count' => (int) $airline->flight_count,
             ])
             ->values();
@@ -86,7 +85,7 @@ class FlightController extends Controller
                 $airlinePlaceholders[] = ':' . $placeholder;
                 $bindings[$placeholder] = $airline;
             }
-            $filterSql .= ' AND f.airline IN (' . implode(', ', $airlinePlaceholders) . ')';
+            $filterSql .= ' AND airline_company.name IN (' . implode(', ', $airlinePlaceholders) . ')';
         }
 
         $timeWindows = [
@@ -124,7 +123,7 @@ class FlightController extends Controller
                 f.id AS flight_id,
                 f.origin,
                 f.destination,
-                f.airline,
+                airline_company.name AS airline,
                 f.departure,
                 f.arrival,
                 f.status AS flight_status,
@@ -137,6 +136,7 @@ class FlightController extends Controller
                 SUM(CASE WHEN s.status = 'available' THEN 1 ELSE 0 END) AS available_seats
             FROM dbo.flights f
             INNER JOIN dbo.aircraft ac ON ac.id = f.aircraft_id
+            LEFT JOIN dbo.airline_companies airline_company ON airline_company.id = f.airline_company_id
             LEFT JOIN dbo.seats s ON s.flight_id = f.id
             WHERE f.origin = :origin
               AND f.destination = :destination
@@ -147,7 +147,7 @@ class FlightController extends Controller
                 f.id,
                 f.origin,
                 f.destination,
-                f.airline,
+                airline_company.name,
                 f.departure,
                 f.arrival,
                 f.status,
