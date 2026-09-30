@@ -10,8 +10,7 @@ class AdminController extends Controller
 {
     public function dashboard(): JsonResponse
     {
-        $sql = file_get_contents(database_path('sql/admin_dashboard.sql'));
-        $rows = DB::select($sql);
+        $rows = DB::select('EXEC dbo.usp_admin_dashboard');
 
         if (empty($rows) || empty($rows[0]->dashboard_json)) {
             return response()->json(['message' => 'Dashboard data is unavailable.'], 503);

@@ -61,6 +61,12 @@ Tables created by migrations:
 - maintenance_logs
 - personal_access_tokens
 
+### SQL Server Maintenance and Analytics
+
+- When a flight first changes to `completed`, `dbo.trg_flights_completed_maintenance` adds its departure-to-arrival duration to the assigned aircraft's `total_flight_hours`.
+- When an aircraft reaches its `maintenance_threshold`, the trigger creates one scheduled maintenance log while no active maintenance log exists for that aircraft.
+- The admin dashboard executes `dbo.usp_admin_dashboard`, which returns flight, booking, occupancy, revenue, and recent transaction data as JSON.
+
 ## Run With Docker
 
 1. Build and start containers:
