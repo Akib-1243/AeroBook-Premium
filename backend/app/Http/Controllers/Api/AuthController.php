@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Admin;
+use App\Models\AirlineAccount;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -144,6 +145,42 @@ class AuthController extends Controller
                 'role' => 'admin',
             ],
         ]);
+    }
+
+    public function airlineLogin(LoginRequest $request): JsonResponse
+    {
+        $credentials = $request->validated();
+        $account = AirlineAccount::with('company')->where('email', $credentials['email'])->first();
+
+        if (! $account || ! Hash::check($credentials['password'], $account->password)) {
+            return response()->json(['message' => 'Invalid airline account credentials.'], 422);
+        }
+
+        $account->tokens()->delete();
+        $token = $account->createToken('airline-portal-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Airline sign in successful.',
+            'access_token' => $token,
+            'user' => [
+                'id' => $account->id,
+                'name' => $account->name,
+                'email' => $account->email,
+                'role' => 'airline_operator',
+                'company' => [
+                    'id' => $account->company->id,
+                    'name' => $account->company->name,
+                    'code' => $account->company->code,
+                ],
+            ],
+        ]);
+    }
+
+    public function airlineLogout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()?->delete();
+
+        return response()->json(['message' => 'Airline portal sign out successful.']);
     }
 
     public function me(Request $request): JsonResponse

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AirlineFlightController;
 use App\Http\Controllers\Api\AirportController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingAccountController;
@@ -24,17 +25,18 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:20,1');
     Route::post('/admin-login', [AuthController::class, 'adminLogin'])->middleware('throttle:20,1');
+    Route::post('/airline-login', [AuthController::class, 'airlineLogin'])->middleware('throttle:20,1');
     Route::post('/password/request-code', [AuthController::class, 'requestPasswordReset'])->middleware('throttle:5,1');
     Route::post('/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1');
 
-    Route::middleware('auth:sanctum')->group(function (): void {
+    Route::middleware(['auth:sanctum', 'customer'])->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
     });
 });
 
-Route::middleware('auth:sanctum')->group(function (): void {
+Route::middleware(['auth:sanctum', 'customer'])->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile/details', [ProfileController::class, 'update']);
     Route::post('/profile/email/request-code', [ProfileController::class, 'sendEmailCode'])->middleware('throttle:5,1');
@@ -62,4 +64,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function (): void {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
+});
+
+Route::middleware(['auth:sanctum', 'airline'])->prefix('airline')->group(function (): void {
+    Route::post('/logout', [AuthController::class, 'airlineLogout']);
+    Route::get('/flights', [AirlineFlightController::class, 'index']);
+    Route::post('/aircraft', [AirlineFlightController::class, 'createAircraft']);
+    Route::put('/flights/{flight}', [AirlineFlightController::class, 'update'])->whereNumber('flight');
 });

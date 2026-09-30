@@ -121,6 +121,16 @@ function AdminLoginPage() {
           </button>
         </div>
 
+        <div className="mt-3 text-center">
+          <button
+            type="button"
+            onClick={() => navigate('/airline-login')}
+            className="text-sm text-indigo-600 hover:underline bg-transparent border-0 cursor-pointer"
+          >
+            Partner airline sign in
+          </button>
+        </div>
+
         <div className="mt-4 text-center">
           <button
             type="button"

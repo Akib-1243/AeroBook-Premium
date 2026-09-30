@@ -7,6 +7,8 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AirlineLoginPage from './pages/AirlineLoginPage';
+import FlightManagementPage from './pages/airline/FlightManagementPage';
 import ProfilePage from './pages/ProfilePage';
 import InformationPage from './pages/InformationPage';
 import SocialLoginPage from './pages/SocialLoginPage';
@@ -59,11 +61,20 @@ function AdminRoute({ children }) {
   return children;
 }
 
+function AirlineRoute({ children }) {
+  if (!localStorage.getItem('airline_token')) {
+    return <Navigate to="/airline-login" replace />;
+  }
+
+  return children;
+}
+
 function AppContent() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin-login" element={<AdminLoginPage />} />
+      <Route path="/airline-login" element={<AirlineLoginPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/home" element={<HomePage />} />
@@ -91,6 +102,7 @@ function AppContent() {
           </AdminRoute>
         }
       />
+      <Route path="/airline/flights" element={<AirlineRoute><FlightManagementPage /></AirlineRoute>} />
       <Route
         path="/my-bookings"
         element={

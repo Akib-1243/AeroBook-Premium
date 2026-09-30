@@ -34,7 +34,9 @@ function AdminDashboardPage() {
     <div className="admin-dashboard">
       <nav className="admin-navbar">
         <h1>✈️ AeroBook Admin</h1>
-        <button onClick={() => navigate('/home')}>Exit Admin</button>
+        <div className="admin-navbar-actions">
+          <button onClick={() => navigate('/home')}>Exit Admin</button>
+        </div>
       </nav>
 
       <div className="admin-content">

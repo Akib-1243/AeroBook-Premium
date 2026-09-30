@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\AirlineAccount;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
 
 class DatabaseSeeder extends Seeder
@@ -25,9 +27,25 @@ class DatabaseSeeder extends Seeder
         ], ['code'], ['city', 'country']);
 
         $now = Carbon::now();
+        DB::table('airline_companies')->updateOrInsert(
+            ['code' => 'PARTNER-AIR'],
+            ['name' => 'Partner Air', 'updated_at' => $now, 'created_at' => $now]
+        );
+        $partnerCompanyId = (int) DB::table('airline_companies')->where('code', 'PARTNER-AIR')->value('id');
+        AirlineAccount::firstOrCreate(
+            ['email' => 'operator@partnerair.test'],
+            [
+                'airline_company_id' => $partnerCompanyId,
+                'name' => 'Partner Air Operations',
+                'password' => Hash::make('password'),
+                'role' => 'airline_operator',
+            ]
+        );
+
         DB::table('aircraft')->upsert([
             [
                 'model' => 'Boeing 737-800',
+                'airline_company_id' => $partnerCompanyId,
                 'capacity' => 180,
                 'total_flight_hours' => 42500.5,
                 'maintenance_threshold' => 50000,
@@ -36,13 +54,14 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'model' => 'Airbus A320neo',
+                'airline_company_id' => $partnerCompanyId,
                 'capacity' => 150,
                 'total_flight_hours' => 31200.0,
                 'maintenance_threshold' => 45000,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-        ], ['model'], ['capacity', 'total_flight_hours', 'maintenance_threshold', 'updated_at']);
+        ], ['airline_company_id', 'model'], ['capacity', 'total_flight_hours', 'maintenance_threshold', 'updated_at']);
 
         $cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi'];
         $aircraftIds = DB::table('aircraft')->pluck('id', 'model');
@@ -64,6 +83,7 @@ class DatabaseSeeder extends Seeder
                 if ($flight) {
                     $flightId = $flight->id;
                     DB::table('flights')->where('id', $flightId)->update([
+                        'airline_company_id' => $partnerCompanyId,
                         'aircraft_id' => $aircraftIds['Boeing 737-800'],
                         'departure' => $flightDeparture,
                         'arrival' => $flightDeparture->copy()->addHour(),
@@ -74,6 +94,7 @@ class DatabaseSeeder extends Seeder
                     ]);
                 } else {
                     $flightId = DB::table('flights')->insertGetId([
+                        'airline_company_id' => $partnerCompanyId,
                         'aircraft_id' => $aircraftIds['Boeing 737-800'],
                         'origin' => $origin,
                         'destination' => $destination,

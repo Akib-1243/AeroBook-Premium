@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAirlineFlights, logoutAirline, updateAirlineFlight } from '../../api/airlineFlights';
+import { createAirlineAircraft, getAirlineFlights, logoutAirline, updateAirlineFlight } from '../../api/airlineFlights';
 import '../../styles/AdminDashboard.css';
 import '../../styles/FlightManagement.css';
 
@@ -17,12 +17,22 @@ const toFlightForm = (flight) => ({
 	currency: flight.currency || 'USD',
 });
 
+const emptyAircraftForm = () => ({
+	model: '',
+	capacity: '180',
+	total_flight_hours: '0',
+	maintenance_threshold: '50000',
+});
+
 function FlightManagementPage() {
 	const navigate = useNavigate();
 	const [flights, setFlights] = useState([]);
 	const [airports, setAirports] = useState([]);
 	const [aircraft, setAircraft] = useState([]);
 	 const [company, setCompany] = useState(null);
+	const [showAircraftForm, setShowAircraftForm] = useState(false);
+	const [aircraftForm, setAircraftForm] = useState(emptyAircraftForm);
+	const [addingAircraft, setAddingAircraft] = useState(false);
 	const [selectedId, setSelectedId] = useState(null);
 	const [form, setForm] = useState(null);
 	const [search, setSearch] = useState('');
@@ -109,6 +119,31 @@ function FlightManagementPage() {
 		}
 	};
 
+	const handleCreateAircraft = async (event) => {
+		event.preventDefault();
+		setAddingAircraft(true);
+		setError('');
+		setNotice('');
+		try {
+			const result = await createAirlineAircraft({
+				...aircraftForm,
+				capacity: Number(aircraftForm.capacity),
+				total_flight_hours: Number(aircraftForm.total_flight_hours),
+				maintenance_threshold: Number(aircraftForm.maintenance_threshold),
+			});
+			const newAircraft = result.aircraft;
+			setAircraft((current) => [...current, newAircraft].sort((left, right) => left.model.localeCompare(right.model)));
+			setForm((current) => current ? { ...current, aircraft_id: String(newAircraft.id) } : current);
+			setAircraftForm(emptyAircraftForm());
+			setShowAircraftForm(false);
+			setNotice(result.message || 'Aircraft added to your fleet.');
+		} catch (requestError) {
+			setError(requestError.message || 'Aircraft could not be added.');
+		} finally {
+			setAddingAircraft(false);
+		}
+	};
+
 	return (
 		<div className="admin-dashboard flight-management-page">
 			<nav className="admin-navbar">
@@ -125,14 +160,57 @@ function FlightManagementPage() {
 						<h2>Flight management</h2>
 						<p>Update schedules, routes, aircraft, fares, and flight status.</p>
 					</div>
-					<div className="flight-management-total">
-						<strong>{flights.length}</strong>
-						<span>flights</span>
+					<div className="airline-fleet-actions">
+						<div className="flight-management-total">
+							<strong>{flights.length}</strong>
+							<span>flights</span>
+						</div>
+						<div className="flight-management-total">
+							<strong>{aircraft.length}</strong>
+							<span>aircraft</span>
+						</div>
+						<button type="button" className="flight-edit-button" onClick={() => { setShowAircraftForm((open) => !open); setError(''); }}>
+							{showAircraftForm ? 'Close form' : 'Add aircraft'}
+						</button>
 					</div>
 				</header>
 
 				{error && <p className="flight-management-alert" role="alert">{error}</p>}
 				{notice && <p className="flight-management-notice" role="status">{notice}</p>}
+
+				{showAircraftForm && !loading && (
+					<section className="flight-editor-panel aircraft-create-panel" aria-labelledby="aircraft-form-title">
+						<div className="flight-editor-heading">
+							<div>
+								<p className="flight-management-eyebrow">{company?.code || 'AIRLINE'} FLEET</p>
+								<h3 id="aircraft-form-title">Add aircraft</h3>
+							</div>
+						</div>
+						<form className="flight-editor-form" onSubmit={handleCreateAircraft}>
+							<label>
+								<span>Aircraft model or registration</span>
+								<input type="text" value={aircraftForm.model} onChange={(event) => setAircraftForm((current) => ({ ...current, model: event.target.value }))} maxLength="120" placeholder="e.g. Airbus A321neo" required />
+							</label>
+							<div className="flight-form-row">
+								<label>
+									<span>Seat capacity</span>
+									<input type="number" value={aircraftForm.capacity} onChange={(event) => setAircraftForm((current) => ({ ...current, capacity: event.target.value }))} min="1" max="2000" step="1" required />
+								</label>
+								<label>
+									<span>Current flight hours</span>
+									<input type="number" value={aircraftForm.total_flight_hours} onChange={(event) => setAircraftForm((current) => ({ ...current, total_flight_hours: event.target.value }))} min="0" step="0.1" required />
+								</label>
+							</div>
+							<label>
+								<span>Maintenance threshold (hours)</span>
+								<input type="number" value={aircraftForm.maintenance_threshold} onChange={(event) => setAircraftForm((current) => ({ ...current, maintenance_threshold: event.target.value }))} min="0.1" step="0.1" required />
+							</label>
+							<button type="submit" className="flight-save-button" disabled={addingAircraft}>
+								{addingAircraft ? 'Adding aircraft...' : 'Add to fleet'}
+							</button>
+						</form>
+					</section>
+				)}
 
 				{loading ? <p className="dashboard-loading">Loading flights...</p> : (
 					<div className="flight-management-layout">
@@ -169,7 +247,7 @@ function FlightManagementPage() {
 											<th>Fare</th>
 											<th>Seats</th>
 											<th>Status</th>
-											<th><span className="sr-only">Actions</span></th>
+											<th>Actions</th>
 										</tr>
 									</thead>
 									<tbody>
